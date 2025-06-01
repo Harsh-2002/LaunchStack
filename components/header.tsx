@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, ChevronRight, ArrowRight } from 'lucide-react';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,11 +51,17 @@ export default function Header() {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
+          <Link href="/features" className="text-sm font-medium hover:text-primary transition-colors">
+            Features
+          </Link>
           <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
             Contact
           </Link>
-          <Button variant="default" size="sm" className="bg-black text-white hover:bg-gray-800" asChild>
-            <Link href="/pricing">Get Started</Link>
+          <Button variant="default" size="sm" className="bg-black text-white hover:bg-gray-800 flex items-center" asChild>
+            <Link href="/pricing">
+              Get Started
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </nav>
         
@@ -71,14 +77,24 @@ export default function Header() {
             <SheetContent side="right" className="w-[240px] sm:w-[300px]">
               <div className="flex flex-col space-y-4 mt-8">
                 <Link 
+                  href="/features" 
+                  className="text-lg font-medium px-2 py-1.5 hover:bg-accent rounded-md transition-colors"
+                  onClick={closeSheet}
+                >
+                  Features
+                </Link>
+                <Link 
                   href="/contact" 
                   className="text-lg font-medium px-2 py-1.5 hover:bg-accent rounded-md transition-colors"
                   onClick={closeSheet}
                 >
                   Contact
                 </Link>
-                <Button asChild className="mt-2 bg-black text-white hover:bg-gray-800">
-                  <Link href="/pricing" onClick={closeSheet}>Get Started</Link>
+                <Button asChild className="mt-2 bg-black text-white hover:bg-gray-800 flex items-center">
+                  <Link href="/pricing" onClick={closeSheet}>
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
             </SheetContent>

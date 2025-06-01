@@ -56,13 +56,13 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="hidden lg:flex justify-center items-center"
           >
-            <div className="relative w-full max-w-[550px] mx-auto">
-              <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-2xl border border-gray-200 shadow-2xl">
+            <div className="relative w-full max-w-[650px] mx-auto">
+              <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-2xl border-[0.5px] border-gray-200 shadow-2xl">
                 <Image
                   src="/image.png"
                   alt="n8n Workflow Automation Diagram"
-                  width={600}
-                  height={400}
+                  width={700}
+                  height={466}
                   className="rounded-xl w-full h-auto object-cover"
                   priority
                 />
