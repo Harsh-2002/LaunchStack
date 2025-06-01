@@ -3,12 +3,74 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
+import Script from 'next/script';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+// Define viewport metadata as an object since the Viewport type is not available in this Next.js version
+const viewportMetadata = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
-  title: 'LaunchStack',
-  description: 'Professional n8n hosting service with 99.9% uptime guarantee',
+  metadataBase: new URL('https://launchstack.in'),
+  title: {
+    default: 'LaunchStack - Affordable n8n Hosting Service',
+    template: '%s | LaunchStack'
+  },
+  description: 'Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee. Starting at just $2/month.',
+  keywords: ['n8n hosting', 'workflow automation', 'n8n cloud alternative', 'managed n8n', 'n8n server', 'automation platform', 'no-code automation'],
+  creator: 'LaunchStack Team',
+  publisher: 'LaunchStack',
+  formatDetection: {
+    email: false,
+    telephone: false,
+    address: false,
+  },
+  // Include viewport properties directly in metadata (this is supported in Next.js 13)
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://launchstack.in',
+    title: 'LaunchStack - Affordable n8n Hosting Service',
+    description: 'Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee.',
+    siteName: 'LaunchStack',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'LaunchStack - n8n Hosting Service',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LaunchStack - Affordable n8n Hosting Service',
+    description: 'Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee.',
+    images: ['/og-image.jpg'],
+  },
+  alternates: {
+    canonical: 'https://launchstack.in',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -28,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -42,6 +104,55 @@ export default function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        {/* Organization Schema Markup */}
+        <Script id="schema-organization" type="application/ld+json" strategy="afterInteractive">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "LaunchStack",
+              "url": "https://launchstack.in",
+              "logo": "https://launchstack.in/logo.svg",
+              "description": "Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee.",
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "IN",
+                "addressLocality": "Mumbai"
+              },
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "email": "support@launchstack.in"
+              },
+              "sameAs": [
+                "https://twitter.com/launchstack",
+                "https://linkedin.com/company/launchstack"
+              ]
+            }
+          `}
+        </Script>
+        {/* Service Schema Markup */}
+        <Script id="schema-service" type="application/ld+json" strategy="afterInteractive">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "Service",
+              "name": "n8n Hosting",
+              "provider": {
+                "@type": "Organization",
+                "name": "LaunchStack"
+              },
+              "description": "Managed n8n hosting service with dedicated resources and unlimited workflow executions",
+              "offers": {
+                "@type": "Offer",
+                "price": "2.00",
+                "priceCurrency": "USD",
+                "priceValidUntil": "${new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]}",
+                "availability": "https://schema.org/InStock"
+              }
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
