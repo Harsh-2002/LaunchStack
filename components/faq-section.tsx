@@ -1,8 +1,12 @@
 "use client";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function FAQSection() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   const faqs = [
     {
       question: "What is n8n?",
@@ -44,14 +48,34 @@ export function FAQSection() {
           </p>
         </div>
         
-        <Accordion type="single" collapsible className="w-full">
+        <div className="space-y-2">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left font-medium">{faq.question}</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
-            </AccordionItem>
+            <div 
+              key={index}
+              className="border-b border-gray-200 overflow-hidden"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <div className="py-4 flex justify-between items-center cursor-pointer">
+                <h3 className="text-left font-medium">{faq.question}</h3>
+                <ChevronDown 
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-transform duration-300",
+                    hoveredIndex === index ? "rotate-180" : ""
+                  )} 
+                />
+              </div>
+              <div 
+                className={cn(
+                  "overflow-hidden transition-all duration-300 ease-in-out text-muted-foreground text-sm",
+                  hoveredIndex === index ? "max-h-96 pb-4" : "max-h-0 pb-0"
+                )}
+              >
+                {faq.answer}
+              </div>
+            </div>
           ))}
-        </Accordion>
+        </div>
       </div>
     </section>
   );

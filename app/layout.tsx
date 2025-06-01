@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'LaunchStack - Professional Workflow Automation',
+  title: 'LaunchStack',
   description: 'Professional n8n hosting service with 99.9% uptime guarantee',
   icons: {
     icon: [
