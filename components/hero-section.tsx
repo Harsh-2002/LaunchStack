@@ -68,9 +68,6 @@ export function HeroSection() {
                 />
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
               </div>
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-8 h-8 bg-black rounded-full opacity-10"></div>
-              <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-gray-400 rounded-full opacity-20"></div>
             </div>
           </motion.div>
         </div>
