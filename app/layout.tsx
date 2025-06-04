@@ -20,7 +20,7 @@ const viewportMetadata = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://launchstack.in'),
+  metadataBase: new URL('https://launch-stack.srvr.site'),
   title: {
     default: 'LaunchStack - Affordable n8n Hosting Service',
     template: '%s | LaunchStack'
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://launchstack.in',
+    url: 'https://launch-stack.srvr.site',
     title: 'LaunchStack - Affordable n8n Hosting Service',
     description: 'Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee.',
     siteName: 'LaunchStack',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/images/preview/preview.webp',
         width: 1200,
         height: 630,
         alt: 'LaunchStack - n8n Hosting Service',
@@ -56,10 +56,10 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'LaunchStack - Affordable n8n Hosting Service',
     description: 'Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee.',
-    images: ['/og-image.jpg'],
+    images: ['/images/preview/preview.webp'],
   },
   alternates: {
-    canonical: 'https://launchstack.in',
+    canonical: 'https://launch-stack.srvr.site',
   },
   robots: {
     index: true,
@@ -111,8 +111,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "LaunchStack",
-              "url": "https://launchstack.in",
-              "logo": "https://launchstack.in/logo.svg",
+              "url": "https://launch-stack.srvr.site",
+              "logo": "https://launch-stack.srvr.site/logo.svg",
               "description": "Professional n8n hosting service with dedicated resources, unlimited workflows, and 99.9% uptime guarantee.",
               "address": {
                 "@type": "PostalAddress",
@@ -122,11 +122,10 @@ export default function RootLayout({
               "contactPoint": {
                 "@type": "ContactPoint",
                 "contactType": "customer support",
-                "email": "support@launchstack.in"
+                "email": "support@firstfinger.io"
               },
               "sameAs": [
-                "https://twitter.com/launchstack",
-                "https://linkedin.com/company/launchstack"
+                "https://www.linkedin.com/company/firstfinger/?viewAsMember=true"
               ]
             }
           `}

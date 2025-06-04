@@ -17,10 +17,10 @@ export function HeroSection() {
             transition={{ duration: 0.5 }}
           >
             <h1 id="hero-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight text-foreground">
-              Affordable n8n Hosting for Your Workflow Automation
+              Build Workflows That Actually Work
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-6 md:mb-8 max-w-xl">
-              Get started with n8n hosting at just $2/month. Focus on your workflows while we handle the infrastructure.
+              Scale from prototype to production seamlessly. Fully managed N8N that lets you focus on what matters.
             </p>
             
             <div className="flex flex-wrap gap-3 md:gap-4">

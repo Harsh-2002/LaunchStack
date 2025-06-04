@@ -40,7 +40,7 @@ const CURRENCY_SYMBOLS = {
 export function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('starter');
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro' | 'enterprise'>('starter');
   const [currency, setCurrency] = useState<'USD' | 'EUR' | 'INR'>('USD');
 
   const features = {
@@ -62,10 +62,21 @@ export function PricingSection() {
       "Priority email support",
       "Daily backups",
       "Custom domain"
+    ],
+    enterprise: [
+      "Custom n8n automation development",
+      "Full-service implementation",
+      "Dedicated automation consultant",
+      "Integration with existing systems",
+      "Training and onboarding",
+      "24/7 priority support",
+      "Custom workflows and templates",
+      "Performance optimization",
+      "Ongoing maintenance and updates"
     ]
   };
 
-  const handlePlanSelect = (plan: 'starter' | 'pro') => {
+  const handlePlanSelect = (plan: 'starter' | 'pro' | 'enterprise') => {
     setSelectedPlan(plan);
     setIsFormOpen(true);
   };
@@ -158,7 +169,7 @@ export function PricingSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {/* Starter Plan */}
           <div className="relative border-2 rounded-lg p-4 sm:p-6 flex flex-col h-full transition-all duration-200 hover:border-black hover:shadow-lg">
             <div className="mb-3 sm:mb-4">
@@ -324,6 +335,72 @@ export function PricingSection() {
               </Button>
             </div>
           </div>
+
+          {/* Enterprise Custom Plan */}
+          <div className="relative border-2 border-black rounded-lg p-4 sm:p-6 flex flex-col h-full bg-black text-white shadow-2xl transform hover:scale-105 transition-all duration-200">
+            <div className="absolute top-0 right-0 -translate-y-1/2 bg-white text-black text-xs font-bold py-1 px-3 rounded-full border-2 border-black">
+              PREMIUM
+            </div>
+            <div className="mb-3 sm:mb-4">
+              <h3 className="text-lg font-medium text-white">Enterprise Custom</h3>
+              <p className="text-xs sm:text-sm text-gray-300">Full-service automation solutions</p>
+            </div>
+            <div className="mb-3 sm:mb-4">
+              <span className="text-3xl sm:text-4xl font-bold text-white">Custom</span>
+              <span className="text-gray-300 text-sm">/project</span>
+            </div>
+            
+            {/* Service Specifications */}
+            <div className="mb-4 sm:mb-6 bg-gray-900 border border-gray-700 p-3 sm:p-4 rounded-lg">
+              <h4 className="text-xs sm:text-sm font-medium mb-2 flex items-center text-white">
+                <Goal className="h-3.5 sm:h-4 w-3.5 sm:w-4 mr-2 text-white" />
+                Service Delivery
+              </h4>
+              <div className="space-y-1.5 sm:space-y-2">
+                <div className="flex items-center text-xs sm:text-sm text-gray-300">
+                  <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-400" />
+                  <span>Dedicated automation consultant</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm text-gray-300">
+                  <Activity className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-400" />
+                  <span>End-to-end implementation</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm text-gray-300">
+                  <Server className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-400" />
+                  <span>Custom infrastructure setup</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm text-gray-300">
+                  <Gauge className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-400" />
+                  <span>Performance optimization</span>
+                </div>
+              </div>
+            </div>
+            
+            <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-8 flex-grow text-sm">
+              {features.enterprise.map((feature, index) => (
+                <li key={index} className="flex items-start">
+                  <Check className="h-4 sm:h-5 w-4 sm:w-5 text-white mr-1.5 sm:mr-2 shrink-0 mt-0.5" />
+                  <span className="text-gray-300">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="space-y-3 sm:space-y-4">
+              {/* Trust Elements */}
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-gray-300">
+                <span className="text-center">✓ 30-day money-back guarantee</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-gray-300">
+                <span className="text-center">✓ Free consultation & project scoping</span>
+              </div>
+              <Button 
+                onClick={() => handlePlanSelect('enterprise')}
+                className="w-full bg-white text-black hover:bg-gray-100 text-sm sm:text-base py-2 sm:py-2.5 font-semibold"
+              >
+                Contact Sales
+              </Button>
+              <p className="text-xs text-center text-gray-400 mt-2">Custom quote within 24 hours</p>
+            </div>
+          </div>
         </div>
         
         {/* Pricing Comparison Label - Centered */}
@@ -336,13 +413,14 @@ export function PricingSection() {
         
         {/* Pricing Comparison Table - Always Visible */}
         <div className="mt-4 overflow-x-auto -mx-4 sm:mx-0 pb-2">
-          <div className="min-w-[600px] px-4 sm:px-0">
+          <div className="min-w-[800px] px-4 sm:px-0">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[150px] sm:w-[200px] text-xs sm:text-sm">Feature</TableHead>
                   <TableHead className="text-xs sm:text-sm">LaunchStack Starter</TableHead>
                   <TableHead className="text-xs sm:text-sm">LaunchStack Pro</TableHead>
+                  <TableHead className="text-xs sm:text-sm">LaunchStack Enterprise</TableHead>
                   <TableHead className="text-xs sm:text-sm">n8n Cloud Starter</TableHead>
                   <TableHead className="text-xs sm:text-sm">n8n Cloud Pro</TableHead>
                 </TableRow>
@@ -352,13 +430,23 @@ export function PricingSection() {
                   <TableCell className="font-medium text-xs sm:text-sm">Monthly Price</TableCell>
                   <TableCell className="text-xs sm:text-sm">{formatPrice(starterMonthlyPrice)}</TableCell>
                   <TableCell className="text-xs sm:text-sm">{formatPrice(proMonthlyPrice)}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Custom Quote</TableCell>
                   <TableCell className="text-xs sm:text-sm">{formatPrice(24)}</TableCell>
                   <TableCell className="text-xs sm:text-sm">{formatPrice(60)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium text-xs sm:text-sm">Service Type</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Self-managed hosting</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Self-managed hosting</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Full-service automation</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Cloud hosting</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Cloud hosting</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">CPU</TableCell>
                   <TableCell className="text-xs sm:text-sm">1/2 Core</TableCell>
                   <TableCell className="text-xs sm:text-sm">1 Core (auto-scalable)</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Custom infrastructure</TableCell>
                   <TableCell className="text-xs sm:text-sm">Shared</TableCell>
                   <TableCell className="text-xs sm:text-sm">Shared</TableCell>
                 </TableRow>
@@ -366,6 +454,7 @@ export function PricingSection() {
                   <TableCell className="font-medium text-xs sm:text-sm">Memory</TableCell>
                   <TableCell className="text-xs sm:text-sm">512 MB</TableCell>
                   <TableCell className="text-xs sm:text-sm">1 GB (auto-scalable)</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Custom allocation</TableCell>
                   <TableCell className="text-xs sm:text-sm">Not specified</TableCell>
                   <TableCell className="text-xs sm:text-sm">Not specified</TableCell>
                 </TableRow>
@@ -373,6 +462,7 @@ export function PricingSection() {
                   <TableCell className="font-medium text-xs sm:text-sm">Storage</TableCell>
                   <TableCell className="text-xs sm:text-sm">2 GB</TableCell>
                   <TableCell className="text-xs sm:text-sm">10 GB</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Unlimited</TableCell>
                   <TableCell className="text-xs sm:text-sm">Not specified</TableCell>
                   <TableCell className="text-xs sm:text-sm">Not specified</TableCell>
                 </TableRow>
@@ -380,25 +470,45 @@ export function PricingSection() {
                   <TableCell className="font-medium text-xs sm:text-sm">Active Workflows</TableCell>
                   <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
                   <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Custom development</TableCell>
                   <TableCell className="text-xs sm:text-sm">5 active workflows</TableCell>
                   <TableCell className="text-xs sm:text-sm">15 active workflows</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium text-xs sm:text-sm">Workflow Executions</TableCell>
-                  <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
-                  <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
-                  <TableCell className="text-xs sm:text-sm">2.5k/month</TableCell>
-                  <TableCell className="text-xs sm:text-sm">10k/month</TableCell>
+                  <TableCell className="font-medium text-xs sm:text-sm">Support Level</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Community</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Priority email</TableCell>
+                  <TableCell className="text-xs sm:text-sm">24/7 dedicated support</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Community</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Email support</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">Custom Domain</TableCell>
                   <TableCell className="text-xs sm:text-sm">No</TableCell>
                   <TableCell className="text-xs sm:text-sm">Yes</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Yes</TableCell>
                   <TableCell className="text-xs sm:text-sm">No</TableCell>
                   <TableCell className="text-xs sm:text-sm">No</TableCell>
                 </TableRow>
                 <TableRow>
+                  <TableCell className="font-medium text-xs sm:text-sm">Implementation</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Self-setup</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Self-setup</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Full-service setup</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Self-setup</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Self-setup</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium text-xs sm:text-sm">Training & Onboarding</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Documentation only</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Documentation only</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Included</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Documentation only</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Documentation only</TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">Dedicated Instance</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Yes</TableCell>
                   <TableCell className="text-xs sm:text-sm">Yes</TableCell>
                   <TableCell className="text-xs sm:text-sm">Yes</TableCell>
                   <TableCell className="text-xs sm:text-sm">No (shared)</TableCell>
@@ -408,6 +518,7 @@ export function PricingSection() {
                   <TableCell className="font-medium text-xs sm:text-sm">Data Location</TableCell>
                   <TableCell className="text-xs sm:text-sm">Mumbai, India</TableCell>
                   <TableCell className="text-xs sm:text-sm">Mumbai, India</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Custom location</TableCell>
                   <TableCell className="text-xs sm:text-sm">Frankfurt, Germany</TableCell>
                   <TableCell className="text-xs sm:text-sm">Frankfurt, Germany</TableCell>
                 </TableRow>
@@ -424,8 +535,8 @@ export function PricingSection() {
         
         {/* Value Proposition with Icons */}
         <div className="mt-12 sm:mt-16 bg-gray-50 border border-gray-200 rounded-xl p-5 sm:p-8">
-          <h3 className="text-lg sm:text-xl font-bold mb-5 sm:mb-6 text-center">Why LaunchStack Pricing Makes Sense</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+          <h3 className="text-lg sm:text-xl font-bold mb-5 sm:mb-6 text-center">Why Choose LaunchStack</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             <div className="flex flex-col items-center text-center">
               <Server className="h-8 w-8 sm:h-10 sm:w-10 text-black mb-3 sm:mb-4" />
               <h4 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">Dedicated Resources</h4>
@@ -440,11 +551,18 @@ export function PricingSection() {
                 We don't limit your workflow executions or active workflows. Run as many automations as your resources can handle.
               </p>
             </div>
-            <div className="flex flex-col items-center text-center sm:col-span-2 md:col-span-1">
+            <div className="flex flex-col items-center text-center">
               <CoinsIcon className="h-8 w-8 sm:h-10 sm:w-10 text-black mb-3 sm:mb-4" />
               <h4 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">Transparent Pricing</h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 Our pricing is simple and predictable - you always know exactly what you'll pay without worrying about overage charges.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Goal className="h-8 w-8 sm:h-10 sm:w-10 text-purple-600 mb-3 sm:mb-4" />
+              <h4 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">Full-Service Options</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Need complete automation solutions? Our Enterprise tier includes dedicated consultants and end-to-end implementation.
               </p>
             </div>
           </div>
