@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Currency conversion rates (as of June 2024)
+// Currency conversion rates (as of June 2025)
 const CONVERSION_RATES = {
   USD: 1,
   EUR: 0.92, // 1 USD = 0.92 EUR
@@ -351,8 +351,8 @@ export function PricingSection() {
                   <TableCell className="font-medium text-xs sm:text-sm">Monthly Price</TableCell>
                   <TableCell className="text-xs sm:text-sm">{formatPrice(starterMonthlyPrice)}</TableCell>
                   <TableCell className="text-xs sm:text-sm">{formatPrice(proMonthlyPrice)}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{formatPrice(20)}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{formatPrice(50)}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{formatPrice(24)}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">{formatPrice(60)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">CPU</TableCell>
@@ -377,17 +377,17 @@ export function PricingSection() {
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">Active Workflows</TableCell>
-                  <TableCell className="text-xs sm:text-sm">Unlimited</TableCell>
-                  <TableCell className="text-xs sm:text-sm">Unlimited</TableCell>
-                  <TableCell className="text-xs sm:text-sm">5 limited</TableCell>
-                  <TableCell className="text-xs sm:text-sm">15 limited</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
+                  <TableCell className="text-xs sm:text-sm">5 active workflows</TableCell>
+                  <TableCell className="text-xs sm:text-sm">15 active workflows</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">Workflow Executions</TableCell>
-                  <TableCell className="text-xs sm:text-sm">Unlimited</TableCell>
-                  <TableCell className="text-xs sm:text-sm">Unlimited</TableCell>
-                  <TableCell className="text-xs sm:text-sm">2.5k/month limited</TableCell>
-                  <TableCell className="text-xs sm:text-sm">10k/month limited</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
+                  <TableCell className="text-xs sm:text-sm">Unlimited*</TableCell>
+                  <TableCell className="text-xs sm:text-sm">2.5k/month</TableCell>
+                  <TableCell className="text-xs sm:text-sm">10k/month</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium text-xs sm:text-sm">Custom Domain</TableCell>
@@ -414,8 +414,10 @@ export function PricingSection() {
             </Table>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-4 text-center px-4 sm:px-0">
-            * n8n Cloud pricing and features based on published information as of June 2024. 
-            LaunchStack provides dedicated resources with no workflow or execution limits.
+            * n8n Cloud pricing and features based on published information as of June 2025. 
+            n8n prices shown are for monthly billing ($24/mo for Starter, $60/mo for Pro); they offer discounts for annual billing.
+            <br />
+            * Unlimited executions are subject to fair usage and available resources (CPU, RAM, storage).
           </p>
         </div>
         
