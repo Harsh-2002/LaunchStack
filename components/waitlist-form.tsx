@@ -19,9 +19,12 @@ import { useToast } from "@/hooks/use-toast";
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().optional(),
-  referralSource: z.enum(["search", "social", "friend", "other"], {
-    required_error: "Please tell us how you found us.",
+  company: z.string().optional(),
+  useCase: z.enum(["automation", "data-integration", "workflows", "testing", "other"], {
+    required_error: "Please tell us your primary use case.",
+  }),
+  currentTool: z.enum(["none", "zapier", "n8n-cloud", "self-hosted", "other"], {
+    required_error: "Please tell us what you currently use.",
   }),
 });
 
@@ -34,13 +37,16 @@ interface WaitlistFormProps {
   billingCycle?: 'monthly' | 'yearly';
 }
 
-export function WaitlistForm({ isOpen, onClose }: WaitlistFormProps) {
+export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFormProps) {
   const { toast } = useToast();
+  const [selectedPlan] = useState(plan);
+  const [selectedBillingCycle] = useState(billingCycle);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
-    phone: '',
-    referralSource: 'search',
+    company: '',
+    useCase: 'automation',
+    currentTool: 'none',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,22 +71,52 @@ export function WaitlistForm({ isOpen, onClose }: WaitlistFormProps) {
     
     try {
       setIsSubmitting(true);
+      
+      // Validate form data
       formSchema.parse(formData);
       
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Submit to Formspree
+      const formspreeEndpoint = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT;
       
-      toast({
-        title: "Welcome to our waitlist! 🎉",
-        description: "We'll notify you as soon as LaunchStack is ready for new users. Thanks for your interest!",
+      if (!formspreeEndpoint) {
+        throw new Error('Formspree endpoint not configured');
+      }
+
+      const response = await fetch(formspreeEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company || '',
+          useCase: formData.useCase,
+          currentTool: formData.currentTool,
+          plan: selectedPlan || 'not specified',
+          billingCycle: selectedBillingCycle || 'not specified',
+          timestamp: new Date().toISOString(),
+          source: 'LaunchStack Waitlist'
+        }),
       });
-      
-      onClose();
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        referralSource: 'search',
-      });
+
+      if (response.ok) {
+        toast({
+          title: "You're on the priority list! 🎉",
+          description: "Thanks for joining our waiting list. We'll contact you soon on a first-come, first-served basis.",
+        });
+        
+        onClose();
+        setFormData({
+          name: '',
+          email: '',
+          company: '',
+          useCase: 'automation',
+          currentTool: 'none',
+        });
+      } else {
+        throw new Error('Failed to submit form');
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<Record<keyof FormData, string>> = {};
@@ -90,6 +126,19 @@ export function WaitlistForm({ isOpen, onClose }: WaitlistFormProps) {
           }
         });
         setErrors(fieldErrors);
+      } else {
+        // Handle different types of errors
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        
+        toast({
+          title: "Submission failed",
+          description: errorMessage.includes('Formspree') 
+            ? "Please check your internet connection and try again."
+            : "There was an error submitting your information. Please try again.",
+          variant: "destructive",
+        });
+        
+        console.error('Form submission error:', error);
       }
     } finally {
       setIsSubmitting(false);
@@ -98,11 +147,19 @@ export function WaitlistForm({ isOpen, onClose }: WaitlistFormProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
-          <DialogTitle>Join Our Waitlist</DialogTitle>
+          <DialogTitle>Join Our Priority Waiting List</DialogTitle>
           <DialogDescription>
-            Be among the first to experience affordable n8n hosting! We'll notify you as soon as we're ready to welcome new users.
+            Be among the first to experience affordable n8n hosting! 
+            {selectedPlan && (
+              <>
+                <br />
+                <span className="font-medium">Selected Plan: {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} ({selectedBillingCycle || 'monthly'})</span>
+              </>
+            )}
+            <br />
+            We're accepting users on a first-come, first-served basis as we scale our infrastructure.
           </DialogDescription>
         </DialogHeader>
         
@@ -135,37 +192,59 @@ export function WaitlistForm({ isOpen, onClose }: WaitlistFormProps) {
               <p className="text-sm text-red-500">{errors.email}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number (Optional)</Label>
+            <Label htmlFor="company">Company (Optional)</Label>
             <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              value={formData.phone}
+              id="company"
+              name="company"
+              value={formData.company}
               onChange={handleChange}
-              placeholder="+1 (555) 000-0000"
+              placeholder="Your company name"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>How did you hear about us? *</Label>
+            <Label>What's your primary use case? *</Label>
             <Select 
-              value={formData.referralSource}
-              onValueChange={(value) => handleSelectChange('referralSource', value)}
+              value={formData.useCase}
+              onValueChange={(value) => handleSelectChange('useCase', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a source" />
+                <SelectValue placeholder="Select your use case" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="search">Search Engine</SelectItem>
-                <SelectItem value="social">Social Media</SelectItem>
-                <SelectItem value="friend">Friend/Colleague</SelectItem>
+                <SelectItem value="automation">Workflow Automation</SelectItem>
+                <SelectItem value="data-integration">Data Integration</SelectItem>
+                <SelectItem value="workflows">Business Process Workflows</SelectItem>
+                <SelectItem value="testing">API Testing & Monitoring</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            {errors.referralSource && (
-              <p className="text-sm text-red-500">{errors.referralSource}</p>
+            {errors.useCase && (
+              <p className="text-sm text-red-500">{errors.useCase}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>What do you currently use for automation? *</Label>
+            <Select 
+              value={formData.currentTool}
+              onValueChange={(value) => handleSelectChange('currentTool', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select current solution" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nothing yet / Starting fresh</SelectItem>
+                <SelectItem value="zapier">Zapier</SelectItem>
+                <SelectItem value="n8n-cloud">n8n Cloud</SelectItem>
+                <SelectItem value="self-hosted">Self-hosted n8n</SelectItem>
+                <SelectItem value="other">Other tools</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.currentTool && (
+              <p className="text-sm text-red-500">{errors.currentTool}</p>
             )}
           </div>
           

@@ -233,8 +233,9 @@ export function PricingSection() {
                 onClick={() => handlePlanSelect('starter')}
                 className="w-full bg-black text-white hover:bg-gray-800 text-sm sm:text-base py-2 sm:py-2.5"
               >
-                Get Started
+                Join Waiting List
               </Button>
+              <p className="text-xs text-center text-muted-foreground mt-2">First come, first served basis</p>
             </div>
           </div>
 
@@ -452,7 +453,9 @@ export function PricingSection() {
       
       <WaitlistForm 
         isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
+        onClose={() => setIsFormOpen(false)}
+        plan={selectedPlan}
+        billingCycle={billingCycle}
       />
     </>
   );

@@ -1009,6 +1009,9 @@ video {
 .max-h-screen {
   max-height: 100vh;
 }
+.max-h-\[90vh\] {
+  max-height: 90vh;
+}
 .min-h-\[150px\] {
   min-height: 150px;
 }
@@ -3078,6 +3081,14 @@ video {
 
   .sm\:max-w-sm {
     max-width: 24rem;
+  }
+
+  .sm\:max-w-\[500px\] {
+    max-width: 500px;
+  }
+
+  .sm\:max-w-\[450px\] {
+    max-width: 450px;
   }
 
   .sm\:grid-cols-2 {
