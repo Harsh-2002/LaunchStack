@@ -48,6 +48,7 @@ export function PricingSection() {
       "1/2 CPU Core",
       "512 MB RAM",
       "2GB storage",
+      "SQLite database",
       "Unlimited operations",
       "Community support",
       "Weekly backups"
@@ -56,6 +57,7 @@ export function PricingSection() {
       "1 CPU Core (auto-scalable)",
       "1GB RAM (auto-scalable)",
       "10GB storage",
+      "PostgreSQL database",
       "Unlimited operations",
       "Priority email support",
       "Daily backups",
@@ -184,6 +186,10 @@ export function PricingSection() {
                   <span>512 MB RAM</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm">
+                  <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
+                  <span>SQLite database</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm">
                   <Activity className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
                   <span>Unlimited workflows & operations</span>
                 </div>
@@ -260,6 +266,10 @@ export function PricingSection() {
                 <div className="flex items-center text-xs sm:text-sm">
                   <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
                   <span>1 GB RAM (auto-scalable)</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm">
+                  <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
+                  <span>PostgreSQL database</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm">
                   <Activity className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
@@ -441,8 +451,6 @@ export function PricingSection() {
       <WaitlistForm 
         isOpen={isFormOpen} 
         onClose={() => setIsFormOpen(false)} 
-        plan={selectedPlan}
-        billingCycle={billingCycle}
       />
     </>
   );

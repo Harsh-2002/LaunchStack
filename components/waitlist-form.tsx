@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from 'zod';
 import { useToast } from "@/hooks/use-toast";
@@ -21,16 +20,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   phone: z.string().optional(),
-  plan: z.enum(["starter", "pro"], {
-    required_error: "Please select a plan.",
-  }),
-  billingCycle: z.enum(["monthly", "yearly"], {
-    required_error: "Please select a billing cycle.",
-  }),
-  paymentMethod: z.enum(["paypal", "upi"], {
-    required_error: "Please select a payment method.",
-  }),
-  referralSource: z.enum(["search", "social", "friend"], {
+  referralSource: z.enum(["search", "social", "friend", "other"], {
     required_error: "Please tell us how you found us.",
   }),
 });
@@ -40,19 +30,16 @@ type FormData = z.infer<typeof formSchema>;
 interface WaitlistFormProps {
   isOpen: boolean;
   onClose: () => void;
-  plan: 'starter' | 'pro';
-  billingCycle: 'monthly' | 'yearly';
+  plan?: 'starter' | 'pro';
+  billingCycle?: 'monthly' | 'yearly';
 }
 
-export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle: initialBillingCycle }: WaitlistFormProps) {
+export function WaitlistForm({ isOpen, onClose }: WaitlistFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     phone: '',
-    plan: initialPlan,
-    billingCycle: initialBillingCycle,
-    paymentMethod: 'paypal',
     referralSource: 'search',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -83,8 +70,8 @@ export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle:
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
-        title: "You've joined our waitlist!",
-        description: "We'll contact you soon with more details about getting started.",
+        title: "Welcome to our waitlist! 🎉",
+        description: "We'll notify you as soon as LaunchStack is ready for new users. Thanks for your interest!",
       });
       
       onClose();
@@ -92,9 +79,6 @@ export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle:
         name: '',
         email: '',
         phone: '',
-        plan: 'starter',
-        billingCycle: 'monthly',
-        paymentMethod: 'paypal',
         referralSource: 'search',
       });
     } catch (error) {
@@ -118,7 +102,7 @@ export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle:
         <DialogHeader>
           <DialogTitle>Join Our Waitlist</DialogTitle>
           <DialogDescription>
-            Fill out this form to join our waitlist and we'll get back to you soon with access to our n8n hosting platform.
+            Be among the first to experience affordable n8n hosting! We'll notify you as soon as we're ready to welcome new users.
           </DialogDescription>
         </DialogHeader>
         
@@ -165,60 +149,6 @@ export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle:
           </div>
 
           <div className="space-y-2">
-            <Label>Plan *</Label>
-            <RadioGroup
-              value={formData.plan}
-              onValueChange={(value) => handleSelectChange('plan', value)}
-              className="grid grid-cols-2 gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="starter" id="starter" />
-                <Label htmlFor="starter">Starter ($2/mo)</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="pro" id="pro" />
-                <Label htmlFor="pro">Pro ($5/mo)</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Billing Cycle *</Label>
-            <RadioGroup
-              value={formData.billingCycle}
-              onValueChange={(value) => handleSelectChange('billingCycle', value)}
-              className="grid grid-cols-2 gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="monthly" id="monthly" />
-                <Label htmlFor="monthly">Monthly</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yearly" id="yearly" />
-                <Label htmlFor="yearly">Yearly (Save 16%)</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Payment Method *</Label>
-            <RadioGroup
-              value={formData.paymentMethod}
-              onValueChange={(value) => handleSelectChange('paymentMethod', value)}
-              className="grid grid-cols-2 gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="paypal" id="paypal" />
-                <Label htmlFor="paypal">PayPal</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="upi" id="upi" />
-                <Label htmlFor="upi">UPI</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="space-y-2">
             <Label>How did you hear about us? *</Label>
             <Select 
               value={formData.referralSource}
@@ -231,8 +161,12 @@ export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle:
                 <SelectItem value="search">Search Engine</SelectItem>
                 <SelectItem value="social">Social Media</SelectItem>
                 <SelectItem value="friend">Friend/Colleague</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+            {errors.referralSource && (
+              <p className="text-sm text-red-500">{errors.referralSource}</p>
+            )}
           </div>
           
           <DialogFooter>
@@ -241,7 +175,7 @@ export function WaitlistForm({ isOpen, onClose, plan: initialPlan, billingCycle:
               className="w-full bg-black text-white hover:bg-gray-800" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Processing..." : "Join Waitlist"}
+              {isSubmitting ? "Adding you to waitlist..." : "Join Waitlist"}
             </Button>
           </DialogFooter>
         </form>
