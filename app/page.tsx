@@ -8,6 +8,7 @@ import { HeroSection } from '@/components/hero-section';
 import { CtaSection } from '@/components/cta-section';
 import { UseCasesCarousel } from '@/components/use-cases-carousel';
 import { ComparisonTable } from '@/components/comparison-table';
+import { WorkflowImage } from '@/components/workflow-image';
 
 export const metadata: Metadata = {
   title: 'LaunchStack - Affordable n8n Hosting Service',
@@ -64,6 +65,8 @@ export default function Home() {
           />
         </div>
       </section>
+      
+      <WorkflowImage />
 
       <section className="py-24 px-4 bg-black text-white" aria-labelledby="workflow-examples-heading">
         <div className="max-w-7xl mx-auto">
