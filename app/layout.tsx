@@ -4,6 +4,10 @@ import { Montserrat, Work_Sans } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Script from 'next/script';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the scroll button with no SSR
+const ScrollButton = dynamic(() => import('@/components/scroll-button'), { ssr: false });
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -110,6 +114,7 @@ export default function RootLayout({
       <body className={workSans.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
+          <ScrollButton />
           <Toaster />
         </ThemeProvider>
         {/* Organization Schema Markup */}
