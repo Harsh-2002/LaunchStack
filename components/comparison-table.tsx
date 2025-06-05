@@ -25,12 +25,6 @@ export function ComparisonTable() {
       highlight: true
     },
     {
-      name: "Integrations",
-      launchstack: "400+ nodes + custom nodes",
-      zapier: "8,000+ apps",
-      make: "1,000+ apps"
-    },
-    {
       name: "Data Privacy",
       launchstack: "Full data control",
       zapier: "Processed in Zapier cloud",
@@ -38,55 +32,37 @@ export function ComparisonTable() {
       highlight: true
     },
     {
-      name: "Technical Skills Needed",
-      launchstack: "No technical skills required",
-      zapier: "Very user-friendly",
-      make: "Moderate learning curve"
-    },
-    {
-      name: "Complex Workflows",
-      launchstack: "Advanced support",
-      zapier: "Limited for complex logic",
-      make: "Good for medium complexity"
-    },
-    {
       name: "Infrastructure Management",
       launchstack: "Fully managed",
       zapier: "Cloud only",
       make: "Cloud only",
       highlight: true
-    },
-    {
-      name: "Customization",
-      launchstack: "Highly flexible",
-      zapier: "Limited",
-      make: "Moderate"
     }
   ];
 
   return (
-    <section className="py-24 px-4">
+    <section className="py-16 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Platform Comparison</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            See how LaunchStack makes n8n accessible and affordable compared to other automation platforms
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 font-heading">Platform Comparison</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
+            See how LaunchStack compares to other automation platforms
           </p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200 p-1">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px]">Feature</TableHead>
-                <TableHead className="text-center">LaunchStack (n8n)</TableHead>
-                <TableHead className="text-center">Zapier</TableHead>
-                <TableHead className="text-center">Make (Integromat)</TableHead>
+              <TableRow className="bg-gray-50">
+                <TableHead className="w-[200px] font-heading">Feature</TableHead>
+                <TableHead className="text-center font-heading">LaunchStack (n8n)</TableHead>
+                <TableHead className="text-center font-heading">Zapier</TableHead>
+                <TableHead className="text-center font-heading">Make (Integromat)</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="font-body">
               {features.map((feature, index) => (
-                <TableRow key={index} className={feature.highlight ? "bg-black/5" : ""}>
+                <TableRow key={index} className={feature.highlight ? "bg-gray-50" : ""}>
                   <TableCell className="font-medium">{feature.name}</TableCell>
                   <TableCell className="text-center">
                     {typeof feature.launchstack === 'boolean' ? (
@@ -129,8 +105,8 @@ export function ComparisonTable() {
           </Table>
         </div>
 
-        <div className="mt-12 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground font-body">
             LaunchStack provides all the power of n8n without the technical complexity of self-hosting, 
             at a fraction of the cost of other automation platforms.
           </p>

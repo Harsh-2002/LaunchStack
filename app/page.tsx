@@ -25,8 +25,8 @@ export default function Home() {
       
       <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto" aria-labelledby="features-heading">
         <div className="text-center mb-16">
-          <h2 id="features-heading" className="text-3xl md:text-4xl font-bold mb-4">Why Choose LaunchStack?</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <h2 id="features-heading" className="text-3xl md:text-4xl font-bold mb-4 font-heading">Focus on your workflows—we'll handle the rest.</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
             We provide the most reliable and secure hosting solution for your n8n workflows.
           </p>
         </div>
@@ -68,8 +68,8 @@ export default function Home() {
       <section className="py-24 px-4 bg-black text-white" aria-labelledby="workflow-examples-heading">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 id="workflow-examples-heading" className="text-3xl md:text-4xl font-bold mb-4">Popular Workflow Examples</h2>
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+            <h2 id="workflow-examples-heading" className="text-3xl md:text-4xl font-bold mb-4 font-heading">Popular Workflow Examples</h2>
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto font-body">
               Discover how n8n can automate your workflows across various scenarios
             </p>
           </div>

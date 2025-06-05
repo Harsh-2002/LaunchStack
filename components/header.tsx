@@ -1,18 +1,34 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, ChevronRight, ArrowRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   
-  const closeSheet = () => setIsOpen(false);
+  const toggleMenu = () => setIsOpen(!isOpen);
+  const closeMenu = () => setIsOpen(false);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   return (
-    <header className="border-b border-border sticky top-0 bg-background/80 backdrop-blur-sm z-50">
+    <header className="border-b border-border sticky top-0 bg-white/95 backdrop-blur-sm z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-1.5 sm:space-x-2">
           <div className="w-7 h-7 sm:w-8 sm:h-8 bg-black rounded-lg flex items-center justify-center">
@@ -51,55 +67,84 @@ export default function Header() {
         </Link>
         
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-          <Link href="/features" className="text-sm font-medium hover:text-primary transition-colors">
+        <nav className="hidden md:flex items-center space-x-8 lg:space-x-10">
+          <Link 
+            href="/features" 
+            className="text-sm font-medium hover:text-primary relative group transition-colors"
+          >
             Features
+            <span className="absolute -bottom-1.5 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out"></span>
           </Link>
-          <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link 
+            href="/pricing" 
+            className="text-sm font-medium hover:text-primary relative group transition-colors"
+          >
+            Pricing
+            <span className="absolute -bottom-1.5 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out"></span>
+          </Link>
+          <Link 
+            href="/contact" 
+            className="text-sm font-medium hover:text-primary relative group transition-colors"
+          >
             Contact
+            <span className="absolute -bottom-1.5 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out"></span>
           </Link>
-          <Button variant="default" size="sm" className="bg-black text-white hover:bg-gray-800 flex items-center" asChild>
-            <Link href="/pricing">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
         </nav>
         
         {/* Mobile Navigation */}
-        <div className="md:hidden">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[240px] sm:w-[300px]">
-              <div className="flex flex-col space-y-4 mt-8">
-                <Link 
-                  href="/features" 
-                  className="text-lg font-medium px-2 py-1.5 hover:bg-accent rounded-md transition-colors"
-                  onClick={closeSheet}
-                >
-                  Features
-                </Link>
-                <Link 
-                  href="/contact" 
-                  className="text-lg font-medium px-2 py-1.5 hover:bg-accent rounded-md transition-colors"
-                  onClick={closeSheet}
-                >
-                  Contact
-                </Link>
-                <Button asChild className="mt-2 bg-black text-white hover:bg-gray-800 flex items-center">
-                  <Link href="/pricing" onClick={closeSheet}>
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
+        <div className="md:hidden relative" ref={menuRef}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 p-0"
+            onClick={toggleMenu}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
+          >
+            {isOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                id="mobile-menu"
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
+              >
+                <div className="py-1">
+                  <Link 
+                    href="/features" 
+                    className="block px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors"
+                    onClick={closeMenu}
+                  >
+                    Features
                   </Link>
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+                  <Link 
+                    href="/pricing" 
+                    className="block px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors"
+                    onClick={closeMenu}
+                  >
+                    Pricing
+                  </Link>
+                  <Link 
+                    href="/contact" 
+                    className="block px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors"
+                    onClick={closeMenu}
+                  >
+                    Contact
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>

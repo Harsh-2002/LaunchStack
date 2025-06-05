@@ -26,15 +26,15 @@ export function FeatureCard({ title, description, icon }: FeatureCardProps) {
       viewport={{ once: true }}
       role="listitem"
     >
-      <Card className="h-full border-2 hover:border-black transition-colors duration-300">
+      <Card className="h-full border border-gray-200 bg-white shadow-sm hover:border-black hover:shadow-md transition-all duration-300">
         <CardHeader className="pb-2">
           <div className="bg-black text-white p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4" aria-hidden="true">
             <IconComponent className="h-6 w-6" />
           </div>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="font-heading">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription className="text-base text-muted-foreground">{description}</CardDescription>
+          <CardDescription className="text-base text-muted-foreground font-body">{description}</CardDescription>
         </CardContent>
       </Card>
     </motion.div>

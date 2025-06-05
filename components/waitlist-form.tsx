@@ -29,34 +29,12 @@ const formSchema = z.object({
   }),
 });
 
-const enterpriseFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  company: z.string().min(1, { message: "Company name is required for Enterprise inquiries." }),
-  jobTitle: z.string().min(1, { message: "Job title is required." }),
-  phone: z.string().optional(),
-  teamSize: z.enum(["1-10", "11-50", "51-200", "201-1000", "1000+"], {
-    required_error: "Please select your team size.",
-  }),
-  projectScope: z.enum(["single-project", "multiple-projects", "enterprise-wide", "custom-solution"], {
-    required_error: "Please select your project scope.",
-  }),
-  budget: z.enum(["under-5k", "5k-15k", "15k-50k", "50k-100k", "100k+", "flexible"], {
-    required_error: "Please select your budget range.",
-  }),
-  timeline: z.enum(["immediate", "1-month", "2-3-months", "3-6-months", "flexible"], {
-    required_error: "Please select your timeline.",
-  }),
-  requirements: z.string().min(10, { message: "Please describe your requirements (minimum 10 characters)." }),
-});
-
 type FormData = z.infer<typeof formSchema>;
-type EnterpriseFormData = z.infer<typeof enterpriseFormSchema>;
 
 interface WaitlistFormProps {
   isOpen: boolean;
   onClose: () => void;
-  plan?: 'starter' | 'pro' | 'enterprise';
+  plan?: 'starter' | 'pro';
   billingCycle?: 'monthly' | 'yearly';
 }
 
@@ -64,7 +42,6 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
   const { toast } = useToast();
   const [selectedPlan] = useState(plan);
   const [selectedBillingCycle] = useState(billingCycle);
-  const isEnterprise = plan === 'enterprise';
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -74,40 +51,19 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
     currentTool: 'none',
   });
   
-  const [enterpriseFormData, setEnterpriseFormData] = useState<EnterpriseFormData>({
-    name: '',
-    email: '',
-    company: '',
-    jobTitle: '',
-    phone: '',
-    teamSize: '1-10',
-    projectScope: 'single-project',
-    budget: 'flexible',
-    timeline: 'flexible',
-    requirements: '',
-  });
-  
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    if (isEnterprise) {
-      setEnterpriseFormData(prev => ({ ...prev, [name]: value }));
-    } else {
       setFormData(prev => ({ ...prev, [name]: value }));
-    }
     if (errors[name as string]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    if (isEnterprise) {
-      setEnterpriseFormData(prev => ({ ...prev, [name]: value }));
-    } else {
       setFormData(prev => ({ ...prev, [name]: value }));
-    }
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
@@ -119,12 +75,8 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
     try {
       setIsSubmitting(true);
       
-      // Validate form data based on plan type
-      if (isEnterprise) {
-        enterpriseFormSchema.parse(enterpriseFormData);
-      } else {
+      // Validate form data
         formSchema.parse(formData);
-      }
       
       // Submit to Formspree
       const formspreeEndpoint = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT;
@@ -133,23 +85,7 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
         throw new Error('Formspree endpoint not configured');
       }
 
-      const submissionData = isEnterprise ? {
-        name: enterpriseFormData.name,
-        email: enterpriseFormData.email,
-        company: enterpriseFormData.company,
-        jobTitle: enterpriseFormData.jobTitle,
-        phone: enterpriseFormData.phone || '',
-        teamSize: enterpriseFormData.teamSize,
-        projectScope: enterpriseFormData.projectScope,
-        budget: enterpriseFormData.budget,
-        timeline: enterpriseFormData.timeline,
-        requirements: enterpriseFormData.requirements,
-        plan: selectedPlan || 'enterprise',
-        billingCycle: 'custom',
-        timestamp: new Date().toISOString(),
-        source: 'LaunchStack Enterprise Inquiry',
-        formType: 'enterprise'
-      } : {
+      const submissionData = {
         name: formData.name,
         email: formData.email,
         company: formData.company || '',
@@ -171,21 +107,14 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
       });
 
       if (response.ok) {
-        if (isEnterprise) {
-          toast({
-            title: "Enterprise inquiry submitted! 🎯",
-            description: "Thank you for your interest! Our team will contact you within 24 hours with a custom quote and consultation.",
-          });
-        } else {
           toast({
             title: "You're on the priority list! 🎉",
             description: "Thanks for joining our waiting list. We'll contact you soon on a first-come, first-served basis.",
           });
-        }
         
         onClose();
         
-        // Reset forms
+        // Reset form
         setFormData({
           name: '',
           email: '',
@@ -193,24 +122,12 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
           useCase: 'automation',
           currentTool: 'none',
         });
-        setEnterpriseFormData({
-          name: '',
-          email: '',
-          company: '',
-          jobTitle: '',
-          phone: '',
-          teamSize: '1-10',
-          projectScope: 'single-project',
-          budget: 'flexible',
-          timeline: 'flexible',
-          requirements: '',
-        });
       } else {
-        throw new Error('Failed to submit form');
+        throw new Error('Form submission failed');
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const fieldErrors: Partial<Record<string, string>> = {};
+        const fieldErrors: Record<string, string> = {};
         error.errors.forEach(err => {
           if (err.path[0]) {
             fieldErrors[err.path[0] as string] = err.message;
@@ -218,240 +135,50 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
         });
         setErrors(fieldErrors);
       } else {
-        // Handle different types of errors
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        
         toast({
-          title: "Submission failed",
-          description: errorMessage.includes('Formspree') 
-            ? "Please check your internet connection and try again."
-            : "There was an error submitting your information. Please try again.",
+          title: "Error",
+          description: "Something went wrong. Please try again later.",
           variant: "destructive",
         });
-        
-        console.error('Form submission error:', error);
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const getPlanLabel = (plan: string | undefined) => {
+    switch (plan) {
+      case 'starter':
+        return 'Starter Plan';
+      case 'pro':
+        return 'Pro Plan';
+      default:
+        return '';
+    }
+  };
+
+  const getBillingLabel = (cycle: string | undefined) => {
+    switch (cycle) {
+      case 'monthly':
+        return 'Monthly billing';
+      case 'yearly':
+        return 'Annual billing (16% discount)';
+      default:
+        return '';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`${isEnterprise ? 'sm:max-w-[600px] max-h-[90vh] overflow-y-auto' : 'sm:max-w-[450px]'}`}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEnterprise ? 'Enterprise Custom Solution Inquiry' : 'Join Our Priority Waiting List'}
-          </DialogTitle>
+          <DialogTitle>Join the LaunchStack Waitlist</DialogTitle>
           <DialogDescription>
-            {isEnterprise ? (
-              <>
-                Get a custom quote for full-service automation solutions tailored to your business needs.
-                Our team will contact you within 24 hours with a personalized proposal.
-              </>
-            ) : (
-              <>
-                Be among the first to experience affordable n8n hosting! 
-                {selectedPlan && (
-                  <>
-                    <br />
-                    <span className="font-medium">Selected Plan: {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} ({selectedBillingCycle || 'monthly'})</span>
-                  </>
-                )}
-                <br />
-                We're accepting users on a first-come, first-served basis as we scale our infrastructure.
-              </>
-            )}
+            Complete the form below to join our priority waitlist.
+            {selectedPlan && <span className="block mt-1 font-medium">{getPlanLabel(selectedPlan)} - {getBillingLabel(selectedBillingCycle)}</span>}
           </DialogDescription>
         </DialogHeader>
-        
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {isEnterprise ? (
-            // Enterprise Form Fields
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={enterpriseFormData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title *</Label>
-                  <Input
-                    id="jobTitle"
-                    name="jobTitle"
-                    value={enterpriseFormData.jobTitle}
-                    onChange={handleChange}
-                    placeholder="CTO, Operations Manager, etc."
-                  />
-                  {errors.jobTitle && (
-                    <p className="text-sm text-red-500">{errors.jobTitle}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={enterpriseFormData.email}
-                    onChange={handleChange}
-                    placeholder="john@company.com"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone (Optional)</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={enterpriseFormData.phone}
-                    onChange={handleChange}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="company">Company Name *</Label>
-                <Input
-                  id="company"
-                  name="company"
-                  value={enterpriseFormData.company}
-                  onChange={handleChange}
-                  placeholder="Your company name"
-                />
-                {errors.company && (
-                  <p className="text-sm text-red-500">{errors.company}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Team Size *</Label>
-                  <Select 
-                    value={enterpriseFormData.teamSize}
-                    onValueChange={(value) => handleSelectChange('teamSize', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select team size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1-10">1-10 employees</SelectItem>
-                      <SelectItem value="11-50">11-50 employees</SelectItem>
-                      <SelectItem value="51-200">51-200 employees</SelectItem>
-                      <SelectItem value="201-1000">201-1000 employees</SelectItem>
-                      <SelectItem value="1000+">1000+ employees</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.teamSize && (
-                    <p className="text-sm text-red-500">{errors.teamSize}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Project Scope *</Label>
-                  <Select 
-                    value={enterpriseFormData.projectScope}
-                    onValueChange={(value) => handleSelectChange('projectScope', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select project scope" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single-project">Single automation project</SelectItem>
-                      <SelectItem value="multiple-projects">Multiple automation projects</SelectItem>
-                      <SelectItem value="enterprise-wide">Enterprise-wide automation</SelectItem>
-                      <SelectItem value="custom-solution">Custom solution development</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.projectScope && (
-                    <p className="text-sm text-red-500">{errors.projectScope}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Budget Range *</Label>
-                  <Select 
-                    value={enterpriseFormData.budget}
-                    onValueChange={(value) => handleSelectChange('budget', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select budget range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="under-5k">Under $5,000</SelectItem>
-                      <SelectItem value="5k-15k">$5,000 - $15,000</SelectItem>
-                      <SelectItem value="15k-50k">$15,000 - $50,000</SelectItem>
-                      <SelectItem value="50k-100k">$50,000 - $100,000</SelectItem>
-                      <SelectItem value="100k+">$100,000+</SelectItem>
-                      <SelectItem value="flexible">Flexible / To be discussed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.budget && (
-                    <p className="text-sm text-red-500">{errors.budget}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Timeline *</Label>
-                  <Select 
-                    value={enterpriseFormData.timeline}
-                    onValueChange={(value) => handleSelectChange('timeline', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select timeline" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="immediate">Immediate (ASAP)</SelectItem>
-                      <SelectItem value="1-month">Within 1 month</SelectItem>
-                      <SelectItem value="2-3-months">2-3 months</SelectItem>
-                      <SelectItem value="3-6-months">3-6 months</SelectItem>
-                      <SelectItem value="flexible">Flexible</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.timeline && (
-                    <p className="text-sm text-red-500">{errors.timeline}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="requirements">Project Requirements & Goals *</Label>
-                <Textarea
-                  id="requirements"
-                  name="requirements"
-                  value={enterpriseFormData.requirements}
-                  onChange={handleChange}
-                  placeholder="Please describe your automation needs, current challenges, integration requirements, and success criteria. The more details you provide, the better we can tailor our solution to your needs."
-                  rows={4}
-                />
-                {errors.requirements && (
-                  <p className="text-sm text-red-500">{errors.requirements}</p>
-                )}
-              </div>
-            </>
-          ) : (
-            // Regular Waitlist Form Fields
-            <>
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
@@ -459,99 +186,83 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="John Doe"
+              placeholder="Your name"
+              className={errors.name ? "border-red-500" : ""}
                 />
-                {errors.name && (
-                  <p className="text-sm text-red-500">{errors.name}</p>
-                )}
+            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email Address *</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="john@example.com"
+              placeholder="you@example.com"
+              className={errors.email ? "border-red-500" : ""}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email}</p>
-                )}
+            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company">Company (Optional)</Label>
+            <Label htmlFor="company">Company (optional)</Label>
                 <Input
                   id="company"
                   name="company"
                   value={formData.company}
                   onChange={handleChange}
-                  placeholder="Your company name"
+              placeholder="Your company"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>What's your primary use case? *</Label>
+            <Label htmlFor="useCase">Primary Use Case *</Label>
                 <Select 
                   value={formData.useCase}
                   onValueChange={(value) => handleSelectChange('useCase', value)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your use case" />
+              <SelectTrigger className={errors.useCase ? "border-red-500" : ""}>
+                <SelectValue placeholder="Select your primary use case" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="automation">Workflow Automation</SelectItem>
-                    <SelectItem value="data-integration">Data Integration</SelectItem>
-                    <SelectItem value="workflows">Business Process Workflows</SelectItem>
-                    <SelectItem value="testing">API Testing & Monitoring</SelectItem>
+                <SelectItem value="automation">General automation</SelectItem>
+                <SelectItem value="data-integration">Data integration</SelectItem>
+                <SelectItem value="workflows">Business workflows</SelectItem>
+                <SelectItem value="testing">Testing and monitoring</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.useCase && (
-                  <p className="text-sm text-red-500">{errors.useCase}</p>
-                )}
+            {errors.useCase && <p className="text-xs text-red-500">{errors.useCase}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label>What do you currently use for automation? *</Label>
+            <Label htmlFor="currentTool">Currently Using *</Label>
                 <Select 
                   value={formData.currentTool}
                   onValueChange={(value) => handleSelectChange('currentTool', value)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select current solution" />
+              <SelectTrigger className={errors.currentTool ? "border-red-500" : ""}>
+                <SelectValue placeholder="What are you using now?" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Nothing yet / Starting fresh</SelectItem>
+                <SelectItem value="none">Nothing yet</SelectItem>
                     <SelectItem value="zapier">Zapier</SelectItem>
                     <SelectItem value="n8n-cloud">n8n Cloud</SelectItem>
                     <SelectItem value="self-hosted">Self-hosted n8n</SelectItem>
-                    <SelectItem value="other">Other tools</SelectItem>
+                <SelectItem value="other">Other platform</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.currentTool && (
-                  <p className="text-sm text-red-500">{errors.currentTool}</p>
-                )}
+            {errors.currentTool && <p className="text-xs text-red-500">{errors.currentTool}</p>}
               </div>
-            </>
-          )}
           
           <DialogFooter className="mt-6">
-            <Button 
-              type="submit" 
-              className={`w-full text-white hover:opacity-90 ${
-                isEnterprise 
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600' 
-                  : 'bg-black hover:bg-gray-800'
-              }`} 
-              disabled={isSubmitting}
-            >
-              {isSubmitting 
-                ? (isEnterprise ? "Submitting inquiry..." : "Adding you to waitlist...") 
-                : (isEnterprise ? "Request Custom Quote" : "Join Waitlist")
-              }
+            <Button type="button" variant="outline" onClick={onClose} className="mr-2">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Join Waitlist'}
             </Button>
           </DialogFooter>
         </form>

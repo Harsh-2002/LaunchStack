@@ -117,8 +117,8 @@ export function UseCasesCarousel() {
               >
                 <Card className="h-full flex flex-col bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-colors">
                   <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-xl font-semibold text-white mb-3">{workflow.title}</h3>
-                    <p className="text-gray-300 flex-grow">{workflow.description}</p>
+                    <h3 className="text-xl font-semibold text-white mb-3 font-heading">{workflow.title}</h3>
+                    <p className="text-gray-300 flex-grow font-body">{workflow.description}</p>
                   </div>
                 </Card>
               </motion.div>
