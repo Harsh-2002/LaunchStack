@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/root/dev/LaunchStack/app/layout\":[\"static/media/4f05ba3a6752a328-s.p.woff2\",\"static/media/b0088cce7ac0b424-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"

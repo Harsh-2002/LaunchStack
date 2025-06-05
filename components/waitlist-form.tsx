@@ -175,7 +175,6 @@ export function WaitlistForm({ isOpen, onClose, plan, billingCycle }: WaitlistFo
           <DialogTitle>Join the LaunchStack Waitlist</DialogTitle>
           <DialogDescription>
             Complete the form below to join our priority waitlist.
-            {selectedPlan && <span className="block mt-1 font-medium">{getPlanLabel(selectedPlan)} - {getBillingLabel(selectedBillingCycle)}</span>}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">

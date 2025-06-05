@@ -142,7 +142,7 @@ export function CtaSection() {
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-5 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:transform hover:-translate-y-1">
+          <div className="bg-black/70 backdrop-blur-sm rounded-lg p-5 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:transform hover:-translate-y-1">
             <div className="flex justify-center mb-4">
               <Settings className="h-10 w-10 text-gray-300 animate-spin-slow" />
             </div>
@@ -152,7 +152,7 @@ export function CtaSection() {
             </p>
           </div>
           
-          <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-5 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:transform hover:-translate-y-1">
+          <div className="bg-black/70 backdrop-blur-sm rounded-lg p-5 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:transform hover:-translate-y-1">
             <div className="flex justify-center mb-4">
               <LayoutGrid className="h-10 w-10 text-gray-300 animate-pulse" />
             </div>
@@ -162,7 +162,7 @@ export function CtaSection() {
             </p>
           </div>
           
-          <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-5 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:transform hover:-translate-y-1">
+          <div className="bg-black/70 backdrop-blur-sm rounded-lg p-5 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:transform hover:-translate-y-1">
             <div className="flex justify-center mb-4">
               <Workflow className="h-10 w-10 text-gray-300 animate-bounce-slow" />
             </div>
