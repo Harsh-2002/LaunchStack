@@ -5,6 +5,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,6 +37,7 @@ export default function Header() {
   return (
     <header className="border-b border-border sticky top-0 bg-white/95 backdrop-blur-sm z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center justify-between">
+        {/* Logo - Left */}
         <Link href="/" className="flex items-center space-x-1.5 sm:space-x-2">
           <div className="w-7 h-7 sm:w-8 sm:h-8 bg-black rounded-lg flex items-center justify-center">
             <svg
@@ -66,8 +74,9 @@ export default function Header() {
           <span className="font-bold text-base sm:text-xl">LaunchStack</span>
         </Link>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8 lg:space-x-10">
+        {/* Desktop Navigation & Auth - Right */}
+        <div className="hidden md:flex items-center space-x-8">
+          <nav className="flex items-center space-x-8 lg:space-x-10">
           <Link 
             href="/features" 
             className="text-sm font-medium hover:text-primary relative group transition-colors"
@@ -89,7 +98,50 @@ export default function Header() {
             Contact
             <span className="absolute -bottom-1.5 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out"></span>
           </Link>
+          <SignedIn>
+            <Link 
+              href="/dashboard" 
+              className="text-sm font-medium hover:text-primary relative group transition-colors"
+            >
+              Dashboard
+              <span className="absolute -bottom-1.5 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out"></span>
+            </Link>
+          </SignedIn>
         </nav>
+        
+        {/* Authentication buttons */}
+        <div className="flex items-center space-x-4 ml-8 pl-8 border-l border-gray-200">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="bg-white/80 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-400 text-gray-700 hover:text-gray-900 font-semibold transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 backdrop-blur-sm px-4 py-2"
+              >
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button 
+                size="sm"
+                className="bg-black hover:bg-gray-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 border-0 px-4 py-2"
+              >
+                Sign Up
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "w-9 h-9 border-2 border-gray-200 hover:border-gray-300 transition-colors shadow-sm"
+                }
+              }}
+            />
+          </SignedIn>
+        </div>
+        </div>
         
         {/* Mobile Navigation */}
         <div className="md:hidden relative" ref={menuRef}>
@@ -141,6 +193,43 @@ export default function Header() {
                   >
                     Contact
                   </Link>
+                  <SignedIn>
+                    <Link 
+                      href="/dashboard" 
+                      className="block px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors"
+                      onClick={closeMenu}
+                    >
+                      Dashboard
+                    </Link>
+                  </SignedIn>
+                  
+                  {/* Mobile Authentication */}
+                  <div className="border-t border-gray-200 mt-3 pt-3 space-y-3">
+                    <SignedOut>
+                      <SignInButton mode="modal">
+                        <button className="block w-full text-center px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 border-2 border-gray-200 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 rounded-lg mx-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                          Sign In
+                        </button>
+                      </SignInButton>
+                      <SignUpButton mode="modal">
+                        <button className="block w-full text-center px-4 py-3 text-sm font-semibold text-white bg-black hover:bg-gray-800 transition-all duration-300 rounded-lg mx-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                          Sign Up
+                        </button>
+                      </SignUpButton>
+                    </SignedOut>
+                    <SignedIn>
+                      <div className="px-4 py-2.5 text-center">
+                        <UserButton 
+                          afterSignOutUrl="/"
+                          appearance={{
+                            elements: {
+                              avatarBox: "w-9 h-9 border-2 border-gray-200 hover:border-gray-300 transition-colors shadow-sm"
+                            }
+                          }}
+                        />
+                      </div>
+                    </SignedIn>
+                  </div>
                 </div>
               </motion.div>
             )}
