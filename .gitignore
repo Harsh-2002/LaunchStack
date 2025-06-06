@@ -14,7 +14,7 @@
 
 # production
 /build
-/launch-stack.srvr.site
+launch-stack
 
 # misc
 .DS_Store

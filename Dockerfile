@@ -20,6 +20,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Copy ENV for build
+COPY .env.local .env
+
 # Build the Next.js application
 RUN npm run build
 
