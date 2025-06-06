@@ -5,14 +5,15 @@ WORKDIR /app
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+
+# Install necessary packages for building and running the application
 RUN apk add --no-cache libc6-compat
 
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (using legacy-peer-deps for React 19 compatibility)
+RUN npm ci --legacy-peer-deps
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -32,17 +33,17 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-# Create a non-root user and group with numeric UID/GID 
-# to prevent security issues and permission problems
+# Install curl for health check
+RUN apk add --no-cache curl
+
+# Create a non-root user and group with numeric UID/GID to prevent security issues and permission problems
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
 
-# Copy the necessary files from the builder stage
-COPY --from=builder /app/next.config.js ./
+# Copy the standalone build from the builder stage
+COPY --from=builder /app/launch-stack/standalone ./
+COPY --from=builder /app/launch-stack/static ./launch-stack/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/launch-stack ./launch-stack
-COPY --from=builder /app/node_modules ./node_modules
 
 # Set permissions for the non-root user
 RUN chown -R nextjs:nodejs /app
@@ -57,9 +58,9 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-# Add health check
+# Add health check using curl (more reliable in alpine)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+  CMD curl -f http://localhost:3000/ || exit 1
 
 # Run the application
-CMD ["node_modules/.bin/next", "start"] 
+CMD ["node", "server.js"] 

@@ -1,13 +1,10 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Montserrat, Work_Sans } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import Script from 'next/script';
-import dynamic from 'next/dynamic';
-
-// Dynamically import the scroll button with no SSR
-const ScrollButton = dynamic(() => import('@/components/scroll-button'), { ssr: false });
+import ScrollButton from '@/components/scroll-button';
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -23,8 +20,7 @@ const workSans = Work_Sans({
   weight: ['400', '500']
 });
 
-// Define viewport metadata as an object since the Viewport type is not available in this Next.js version
-const viewportMetadata = {
+export const viewport: Viewport = {
   themeColor: '#ffffff',
   width: 'device-width',
   initialScale: 1,
@@ -46,8 +42,6 @@ export const metadata: Metadata = {
     telephone: false,
     address: false,
   },
-  // Include viewport properties directly in metadata (this is supported in Next.js 13)
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
   openGraph: {
     type: 'website',
     locale: 'en_US',
