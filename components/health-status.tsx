@@ -57,7 +57,14 @@ export function HealthStatusComponent({
         status: 'error',
         environment: 'development',
         version: 'unknown',
+        go_version: 'unknown',
         timestamp: new Date().toISOString(),
+        database: {
+          status: 'error'
+        },
+        docker: {
+          status: 'error'
+        }
       });
       setLastCheck(new Date());
       
@@ -219,23 +226,30 @@ export function HealthStatusComponent({
                   <span className="font-medium">Environment:</span> {healthStatus.environment}
                 </div>
               )}
-              {healthStatus?.payment_gateway && (
+              {healthStatus?.go_version && (
                 <div className="text-xs text-muted-foreground">
-                  <span className="font-medium">Payment:</span> {healthStatus.payment_gateway}
+                  <span className="font-medium">Go Version:</span> {healthStatus.go_version}
                 </div>
               )}
             </div>
             {healthStatus?.database && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                {healthStatus.database.status === 'connected' ? (
+                {healthStatus.database.status === 'ok' ? (
                   <CheckCircle className="h-3 w-3 text-green-600" />
                 ) : (
                   <XCircle className="h-3 w-3 text-red-600" />
                 )}
                 <span>Database: {healthStatus.database.status}</span>
-                {healthStatus.database.responseTime && (
-                  <span>({healthStatus.database.responseTime}ms)</span>
+              </div>
+            )}
+            {healthStatus?.docker && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                {healthStatus.docker.status === 'ok' ? (
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                ) : (
+                  <XCircle className="h-3 w-3 text-red-600" />
                 )}
+                <span>Docker: {healthStatus.docker.status}</span>
               </div>
             )}
           </div>

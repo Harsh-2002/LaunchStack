@@ -150,7 +150,7 @@ export const usageApi = {
 // Payment API
 export const paymentApi = {
   getPaymentHistory: (): Promise<Payment[]> => apiRequest('/payments'),
-  createCheckoutSession: (data: { plan: string; success_url: string; cancel_url: string }): Promise<{ checkout_url: string }> =>
+  createCheckoutSession: (data: { plan: string; success_url: string; cancel_url: string }): Promise<{ checkout_url: string; order_id: string }> =>
     apiRequest('/payments/checkout', {
       method: 'POST',
       body: JSON.stringify(data),

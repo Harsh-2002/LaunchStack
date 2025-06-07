@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import type { Instance } from '@/lib/api-client';
 import { EditInstanceDialog } from '@/components/edit-instance-dialog';
+import { ensureHttpsProtocol } from '@/lib/url-utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -136,7 +137,11 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
             asChild
             className="w-full justify-start"
           >
-            <a href={`${instance.url}`} target="_blank" rel="noopener noreferrer">
+            <a 
+              href={ensureHttpsProtocol(instance.url)} 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
               <ExternalLink className="h-4 w-4 mr-2" />
               {instance.url}
             </a>

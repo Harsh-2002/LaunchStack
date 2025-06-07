@@ -15,15 +15,15 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { Instance } from '@/lib/api';
+import { Instance, InstanceStats } from '@/lib/api-client';
 import { Cpu, HardDrive, Database, TrendingUp } from 'lucide-react';
 
 interface UsageChartProps {
   instances: Instance[];
-  usage: Record<string, { cpu: number; memory: number; storage: number; status: string }>;
+  instanceStats: Record<string, InstanceStats>;
 }
 
-export function UsageChart({ instances, usage }: UsageChartProps) {
+export function UsageChart({ instances, instanceStats }: UsageChartProps) {
   // Generate sample time-series data for demonstration
   const generateTimeSeriesData = () => {
     const hours = Array.from({ length: 24 }, (_, i) => {
@@ -44,22 +44,22 @@ export function UsageChart({ instances, usage }: UsageChartProps) {
 
   // Aggregate current usage data
   const currentUsageData = instances.map(instance => {
-    const instanceUsage = usage[instance.id];
+    const stats = instanceStats[instance.id];
     return {
       name: instance.name,
-      cpu: instanceUsage ? (instanceUsage.cpu / instance.cpu_limit) * 100 : 0,
-      memory: instanceUsage ? (instanceUsage.memory / instance.memory_limit) * 100 : 0,
-      storage: instanceUsage ? (instanceUsage.storage / instance.storage_limit) * 100 : 0,
+      cpu: stats ? stats.cpu_usage : 0,
+      memory: stats ? (stats.memory_usage / (1024 * 1024)) : 0, // Convert bytes to MB
+      storage: stats ? (stats.disk_usage / (1024 * 1024 * 1024)) : 0, // Convert bytes to GB
     };
   });
 
   // Calculate total resource usage
   const totalUsage = instances.reduce((acc, instance) => {
-    const instanceUsage = usage[instance.id];
-    if (instanceUsage) {
-      acc.cpu += instanceUsage.cpu;
-      acc.memory += instanceUsage.memory;
-      acc.storage += instanceUsage.storage;
+    const stats = instanceStats[instance.id];
+    if (stats) {
+      acc.cpu += stats.cpu_usage;
+      acc.memory += stats.memory_usage / (1024 * 1024); // Convert to MB
+      acc.storage += stats.disk_usage / (1024 * 1024 * 1024); // Convert to GB
     }
     return acc;
   }, { cpu: 0, memory: 0, storage: 0 });

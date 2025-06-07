@@ -1,6 +1,6 @@
 import { useAuth } from '@clerk/nextjs';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.launchstack.io/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://gw.srvr.site/api/v1';
 
 // Type definitions (shared with server-side API)
 export interface User {
@@ -59,6 +59,23 @@ export interface Usage {
   };
 }
 
+export interface InstanceStats {
+  id: string;
+  instance_id: string;
+  timestamp: string;
+  cpu_usage: number;
+  cpu_formatted: string;
+  memory_usage: number;
+  memory_limit: number;
+  memory_percentage: number;
+  memory_formatted: string;
+  disk_usage: number;
+  disk_formatted: string;
+  network_in: number;
+  network_out: number;
+  network_formatted: string;
+}
+
 export interface Payment {
   id: string;
   amount: number;
@@ -67,6 +84,11 @@ export interface Payment {
   description: string;
   invoice_url: string;
   created_at: string;
+}
+
+export interface CheckoutResponse {
+  checkout_url: string;
+  order_id: string;
 }
 
 export interface Subscription {
@@ -79,17 +101,18 @@ export interface Subscription {
 
 export interface HealthStatus {
   status: 'ok' | 'error';
-  environment: 'development' | 'production';
   version: string;
-  payment_gateway?: string;
-  timestamp?: string;
-  uptime?: number;
-  database?: {
-    status: 'connected' | 'disconnected';
-    responseTime?: number;
+  environment: 'development' | 'production';
+  go_version: string;
+  timestamp: string;
+  database: {
+    status: 'ok' | 'error';
   };
-  services?: {
-    [key: string]: 'healthy' | 'unhealthy';
+  docker: {
+    status: 'ok' | 'error';
+  };
+  api?: {
+    endpoints: string[];
   };
 }
 
@@ -198,6 +221,7 @@ export function useApiClient() {
         apiRequest(`/instances/${id}/stop/`, { method: 'POST' }),
       restart: (id: string): Promise<{ message: string }> =>
         apiRequest(`/instances/${id}/restart/`, { method: 'POST' }),
+      getStats: (id: string): Promise<InstanceStats> => apiRequest(`/instances/${id}/stats/`),
     },
 
     // Usage API
@@ -210,7 +234,7 @@ export function useApiClient() {
     // Payment API
     payments: {
       getHistory: (): Promise<Payment[]> => apiRequest('/payments/'),
-      createCheckoutSession: (data: { plan: string; success_url: string; cancel_url: string }): Promise<{ checkout_url: string }> =>
+      createCheckoutSession: (data: { plan: string; success_url: string; cancel_url: string }): Promise<CheckoutResponse> =>
         apiRequest('/payments/checkout/', {
           method: 'POST',
           body: JSON.stringify(data),

@@ -28,7 +28,7 @@ import {
   AlertCircle,
   RefreshCw
 } from 'lucide-react';
-import { useApiClient, type User, type Instance, type Usage, type Payment, type Subscription, type HealthStatus } from '@/lib/api-client';
+import { useApiClient, type User, type Instance, type Usage, type Payment, type Subscription, type HealthStatus, type InstanceStats } from '@/lib/api-client';
 import { CreateInstanceDialog } from '@/components/create-instance-dialog';
 import { EditInstanceDialog } from '@/components/edit-instance-dialog';
 import { InstanceCard } from '@/components/instance-card';
@@ -41,7 +41,7 @@ import { useToast } from '@/hooks/use-toast';
 export function DashboardContent() {
   const [user, setUser] = useState<User | null>(null);
   const [instances, setInstances] = useState<Instance[]>([]);
-  const [usage, setUsage] = useState<Record<string, any>>({});
+  const [instanceStats, setInstanceStats] = useState<Record<string, InstanceStats>>({});
   const [payments, setPayments] = useState<Payment[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,17 +57,41 @@ export function DashboardContent() {
     try {
       setLoading(true);
       // Use client-side API calls
-      const [userData, instancesData, usageData, paymentsData, subscriptionData] = await Promise.allSettled([
+      const [userData, instancesData, paymentsData, subscriptionData] = await Promise.allSettled([
         api.user.getCurrentUser(),
         api.instances.list(),
-        api.usage.getAll(),
         api.payments.getHistory(),
         api.payments.getSubscriptions()
       ]);
 
       if (userData.status === 'fulfilled') setUser(userData.value);
-      if (instancesData.status === 'fulfilled') setInstances(instancesData.value);
-      if (usageData.status === 'fulfilled') setUsage(usageData.value);
+      
+      let instanceList: Instance[] = [];
+      if (instancesData.status === 'fulfilled') {
+        instanceList = instancesData.value;
+        setInstances(instanceList);
+        
+        // Fetch stats for each instance
+        const statsPromises = instanceList.map(instance => 
+          api.instances.getStats(instance.id).catch(error => {
+            console.warn(`Failed to fetch stats for instance ${instance.id}:`, error);
+            return null;
+          })
+        );
+        
+        const statsResults = await Promise.allSettled(statsPromises);
+        const statsMap: Record<string, InstanceStats> = {};
+        
+        instanceList.forEach((instance, index) => {
+          const statsResult = statsResults[index];
+          if (statsResult.status === 'fulfilled' && statsResult.value) {
+            statsMap[instance.id] = statsResult.value;
+          }
+        });
+        
+        setInstanceStats(statsMap);
+      }
+      
       if (paymentsData.status === 'fulfilled') setPayments(paymentsData.value);
       if (subscriptionData.status === 'fulfilled') setSubscription(subscriptionData.value);
     } catch (error) {
@@ -160,7 +184,8 @@ export function DashboardContent() {
 
   const runningInstances = instances.filter(i => i.status === 'running').length;
   const totalInstances = instances.length;
-  const usagePercentage = user ? (totalInstances / user.resource_limits.max_instances) * 100 : 0;
+  const maxInstances = user?.resource_limits?.max_instances || 10; // Default fallback
+  const usagePercentage = totalInstances > 0 ? (totalInstances / maxInstances) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -187,7 +212,7 @@ export function DashboardContent() {
             <CardContent>
               <div className="text-2xl font-bold">{totalInstances}</div>
               <p className="text-xs text-muted-foreground">
-                {(user?.resource_limits?.max_instances ?? 0) - totalInstances} remaining
+                {maxInstances - totalInstances} remaining
               </p>
             </CardContent>
           </Card>
@@ -282,7 +307,12 @@ export function DashboardContent() {
                   <InstanceCard
                     key={instance.id}
                     instance={instance}
-                    usage={usage[instance.id]}
+                    usage={instanceStats[instance.id] ? {
+                      cpu: instanceStats[instance.id].cpu_usage,
+                      memory: instanceStats[instance.id].memory_usage / (1024 * 1024), // Convert bytes to MB
+                      storage: instanceStats[instance.id].disk_usage / (1024 * 1024 * 1024), // Convert bytes to GB
+                      status: instance.status
+                    } : undefined}
                     onAction={handleInstanceAction}
                     actionLoading={actionLoading}
                     onEdit={loadDashboardData}
@@ -296,7 +326,7 @@ export function DashboardContent() {
           <TabsContent value="usage" className="space-y-6">
             <h2 className="text-2xl font-bold">Resource Usage</h2>
             {instances.length > 0 ? (
-              <UsageChart instances={instances} usage={usage} />
+              <UsageChart instances={instances} instanceStats={instanceStats} />
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -359,19 +389,19 @@ export function DashboardContent() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <Server className="h-4 w-4" />
-                    <span className="text-sm">Max Instances: {user?.resource_limits.max_instances}</span>
+                    <span className="text-sm">Max Instances: {user?.resource_limits?.max_instances || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Cpu className="h-4 w-4" />
-                    <span className="text-sm">CPU Limit: {user?.resource_limits.cpu_limit} cores</span>
+                    <span className="text-sm">CPU Limit: {user?.resource_limits?.cpu_limit || 'N/A'} cores</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <HardDrive className="h-4 w-4" />
-                    <span className="text-sm">Memory: {user?.resource_limits.memory_limit} MB</span>
+                    <span className="text-sm">Memory: {user?.resource_limits?.memory_limit || 'N/A'} MB</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Database className="h-4 w-4" />
-                    <span className="text-sm">Storage: {user?.resource_limits.storage_limit} GB</span>
+                    <span className="text-sm">Storage: {user?.resource_limits?.storage_limit || 'N/A'} GB</span>
                   </div>
                 </div>
               </CardContent>
