@@ -12,6 +12,7 @@ import {
   SignedOut,
   UserButton
 } from '@clerk/nextjs';
+import { HealthStatusComponent } from '@/components/health-status';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -111,6 +112,9 @@ export default function Header() {
         
         {/* Authentication buttons */}
         <div className="flex items-center space-x-4 ml-8 pl-8 border-l border-gray-200">
+          <SignedIn>
+            <HealthStatusComponent variant="minimal" showRefresh={false} />
+          </SignedIn>
           <SignedOut>
             <SignInButton mode="modal">
               <Button 
