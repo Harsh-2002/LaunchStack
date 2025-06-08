@@ -126,11 +126,8 @@ export interface HistoryDataPoint {
   network_out: number;
 }
 
-export interface InstanceStatsHistory {
-  instance_id: string;
-  period: string;
-  data_points: HistoryDataPoint[];
-}
+// Backend returns direct array, not wrapped object
+export type InstanceStatsHistory = HistoryDataPoint[];
 
 // Hook for client-side API requests
 export function useApiClient() {

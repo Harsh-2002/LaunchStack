@@ -48,8 +48,8 @@ export function UsageChart({ instances, instanceStats }: UsageChartProps) {
     try {
       const historyPromises = instances.map(async (instance) => {
         try {
-          const history = await apiClient.instances.getStatsHistory(instance.id, period);
-          return { instanceId: instance.id, data: history.data_points };
+          const historyData = await apiClient.instances.getStatsHistory(instance.id, period);
+          return { instanceId: instance.id, data: historyData };
         } catch (error) {
           console.warn(`Failed to load history for instance ${instance.id}:`, error);
           return { instanceId: instance.id, data: [] };
@@ -88,7 +88,7 @@ export function UsageChart({ instances, instanceStats }: UsageChartProps) {
 
     const sortedTimestamps = Array.from(allTimestamps).sort();
 
-    return sortedTimestamps.map(timestamp => {
+    const result = sortedTimestamps.map(timestamp => {
       const dataPoint: any = {
         time: new Date(timestamp).toLocaleTimeString('en-US', { 
           hour: '2-digit', 
@@ -122,6 +122,8 @@ export function UsageChart({ instances, instanceStats }: UsageChartProps) {
 
       return dataPoint;
     });
+    
+    return result;
   };
 
   const timeSeriesData = processedHistoricalData();
