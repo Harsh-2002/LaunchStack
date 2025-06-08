@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,13 +45,110 @@ export function DashboardContent() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [nextRefresh, setNextRefresh] = useState(10);
   const { toast } = useToast();
   const api = useApiClient();
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    };
+  }, []);
+
+  // Live resource stats polling - every 10 seconds
+  useEffect(() => {
+    if (!loading && instances.length > 0) {
+      // Clear any existing intervals
+      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+      
+      // Start countdown
+      setNextRefresh(10);
+      countdownIntervalRef.current = setInterval(() => {
+        setNextRefresh(prev => {
+          if (prev <= 1) {
+            return 10; // Reset countdown
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      // Start refresh interval
+      refreshIntervalRef.current = setInterval(() => {
+        loadResourceStats();
+      }, 10000); // 10 seconds
+
+      return () => {
+        if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+      };
+    }
+  }, [loading, instances]);
+
+  const loadResourceStats = async (showToast = false) => {
+    if (instances.length === 0) return;
+    
+    try {
+      setStatsLoading(true);
+      
+      // Reset countdown when manually refreshed
+      if (showToast) {
+        setNextRefresh(10);
+        toast({
+          title: "Refreshing",
+          description: "Updating resource statistics...",
+        });
+      }
+      
+      // Fetch stats for each instance
+      const statsPromises = instances.map(instance => 
+        api.instances.getStats(instance.id).catch(error => {
+          console.warn(`Failed to fetch stats for instance ${instance.id}:`, error);
+          return null;
+        })
+      );
+      
+      const statsResults = await Promise.allSettled(statsPromises);
+      const statsMap: Record<string, InstanceStats> = {};
+      
+      instances.forEach((instance, index) => {
+        const statsResult = statsResults[index];
+        if (statsResult.status === 'fulfilled' && statsResult.value) {
+          statsMap[instance.id] = statsResult.value;
+        }
+      });
+      
+      setInstanceStats(statsMap);
+      
+      if (showToast) {
+        toast({
+          title: "Updated",
+          description: "Resource statistics refreshed successfully.",
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to load resource stats:', error);
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: "Failed to refresh resource statistics.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -70,8 +167,14 @@ export function DashboardContent() {
       if (instancesData.status === 'fulfilled') {
         instanceList = instancesData.value;
         setInstances(instanceList);
-        
-        // Fetch stats for each instance
+      }
+      
+      if (paymentsData.status === 'fulfilled') setPayments(paymentsData.value);
+      if (subscriptionData.status === 'fulfilled') setSubscription(subscriptionData.value);
+
+      // Load initial resource stats
+      if (instanceList.length > 0) {
+        setStatsLoading(true);
         const statsPromises = instanceList.map(instance => 
           api.instances.getStats(instance.id).catch(error => {
             console.warn(`Failed to fetch stats for instance ${instance.id}:`, error);
@@ -90,10 +193,8 @@ export function DashboardContent() {
         });
         
         setInstanceStats(statsMap);
+        setStatsLoading(false);
       }
-      
-      if (paymentsData.status === 'fulfilled') setPayments(paymentsData.value);
-      if (subscriptionData.status === 'fulfilled') setSubscription(subscriptionData.value);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       toast({
@@ -123,6 +224,13 @@ export function DashboardContent() {
           break;
         case 'delete':
           result = await api.instances.delete(instanceId);
+          // Remove the deleted instance from state immediately for better UX
+          setInstances(prev => prev.filter(instance => instance.id !== instanceId));
+          setInstanceStats(prev => {
+            const newStats = { ...prev };
+            delete newStats[instanceId];
+            return newStats;
+          });
           break;
       }
 
@@ -131,9 +239,19 @@ export function DashboardContent() {
         description: result.message,
       });
 
-      // Reload instances after action
-      const updatedInstances = await api.instances.list();
-      setInstances(updatedInstances);
+      // For non-delete actions, reload instances and their stats
+      if (action !== 'delete') {
+        const updatedInstances = await api.instances.list();
+        setInstances(updatedInstances);
+        
+        // Refresh stats for the affected instance or all instances
+        if (action === 'start' || action === 'restart') {
+          // Wait a moment for the instance to fully start before fetching stats
+          setTimeout(() => {
+            loadResourceStats();
+          }, 2000);
+        }
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -246,11 +364,19 @@ export function DashboardContent() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Resource Usage</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2">
+                {statsLoading && (
+                  <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
+                )}
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{Math.round(usagePercentage)}%</div>
               <Progress value={usagePercentage} className="mt-2" />
+              {statsLoading && (
+                <p className="text-xs text-blue-600 mt-1">Updating...</p>
+              )}
             </CardContent>
           </Card>
 
@@ -276,7 +402,31 @@ export function DashboardContent() {
           {/* Instances Tab */}
           <TabsContent value="instances" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Your Instances</h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-bold">Your Instances</h2>
+                {instances.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => loadResourceStats(true)}
+                      disabled={statsLoading}
+                    >
+                      {statsLoading ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                      <span className="ml-1">Refresh Stats</span>
+                    </Button>
+                    {!statsLoading && (
+                      <span className="text-xs text-muted-foreground">
+                        Next auto-refresh in {nextRefresh}s
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
               <CreateInstanceDialog onInstanceCreated={loadDashboardData}>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -315,6 +465,7 @@ export function DashboardContent() {
                     } : undefined}
                     onAction={handleInstanceAction}
                     actionLoading={actionLoading}
+                    statsLoading={statsLoading}
                     onEdit={loadDashboardData}
                   />
                 ))}
@@ -326,7 +477,11 @@ export function DashboardContent() {
           <TabsContent value="usage" className="space-y-6">
             <h2 className="text-2xl font-bold">Resource Usage</h2>
             {instances.length > 0 ? (
-              <UsageChart instances={instances} instanceStats={instanceStats} />
+              <UsageChart 
+                instances={instances} 
+                instanceStats={instanceStats} 
+                statsLoading={statsLoading}
+              />
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">

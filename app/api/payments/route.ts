@@ -29,11 +29,22 @@ export async function GET(request: NextRequest) {
       {
         id: 'pay_003',
         order_id: 'order_1234567892',
-        amount: 9.99,
+        amount: 2.00,
         currency: 'USD',
         status: 'completed' as const,
         description: 'Starter Plan - Monthly Subscription',
         created_at: new Date(Date.now() - 62 * 24 * 60 * 60 * 1000).toISOString(),
+        method: 'card',
+        last4: '4242'
+      },
+      {
+        id: 'pay_004',
+        order_id: 'order_1234567893',
+        amount: 2.00,
+        currency: 'USD',
+        status: 'failed' as const,
+        description: 'Starter Plan - Monthly Subscription (Payment Failed)',
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
         method: 'card',
         last4: '4242'
       }

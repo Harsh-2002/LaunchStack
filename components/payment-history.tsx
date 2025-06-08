@@ -35,10 +35,14 @@ export function PaymentHistory({ payments, subscription }: PaymentHistoryProps) 
     switch (status.toLowerCase()) {
       case 'paid':
       case 'succeeded':
+      case 'completed':
+      case 'active':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'pending':
         return <Clock className="h-4 w-4 text-yellow-600" />;
       case 'failed':
+      case 'expired':
+      case 'past_due':
         return <XCircle className="h-4 w-4 text-red-600" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-600" />;
@@ -49,10 +53,14 @@ export function PaymentHistory({ payments, subscription }: PaymentHistoryProps) 
     switch (status.toLowerCase()) {
       case 'paid':
       case 'succeeded':
+      case 'completed':
+      case 'active':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'failed':
+      case 'expired':
+      case 'past_due':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -136,6 +144,20 @@ export function PaymentHistory({ payments, subscription }: PaymentHistoryProps) 
                 </div>
                 <p className="text-sm text-yellow-700 mt-1">
                   Your subscription will end on {formatDate(subscription.current_period_end)}
+                </p>
+              </div>
+            )}
+
+            {subscription.status === 'past_due' && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm font-medium text-red-800">
+                    Payment Failed - Action Required
+                  </span>
+                </div>
+                <p className="text-sm text-red-700 mt-1">
+                  Your payment method failed. Please update your payment information to avoid service interruption.
                 </p>
               </div>
             )}

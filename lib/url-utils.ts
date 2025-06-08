@@ -17,8 +17,8 @@
 export function ensureHttpsProtocol(url: string): string {
   if (!url) return '';
   
-  // If URL already has a protocol (http:// or https://), return as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  // If URL already has any protocol, return as-is
+  if (url.includes('://')) {
     return url;
   }
   

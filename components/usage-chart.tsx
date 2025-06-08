@@ -16,14 +16,15 @@ import {
   Cell
 } from 'recharts';
 import { Instance, InstanceStats } from '@/lib/api-client';
-import { Cpu, HardDrive, Database, TrendingUp } from 'lucide-react';
+import { Cpu, HardDrive, Database, TrendingUp, RefreshCw } from 'lucide-react';
 
 interface UsageChartProps {
   instances: Instance[];
   instanceStats: Record<string, InstanceStats>;
+  statsLoading?: boolean;
 }
 
-export function UsageChart({ instances, instanceStats }: UsageChartProps) {
+export function UsageChart({ instances, instanceStats, statsLoading }: UsageChartProps) {
   // Generate sample time-series data for demonstration
   const generateTimeSeriesData = () => {
     const hours = Array.from({ length: 24 }, (_, i) => {
@@ -117,39 +118,63 @@ export function UsageChart({ instances, instanceStats }: UsageChartProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">CPU Usage</CardTitle>
-            <Cpu className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              {statsLoading && (
+                <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
+              )}
+              <Cpu className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsage.cpu.toFixed(1)}</div>
             <p className="text-xs text-muted-foreground">
               of {totalLimits.cpu} cores ({utilizationData[0].percentage.toFixed(1)}%)
             </p>
+            {statsLoading && (
+              <p className="text-xs text-blue-600 mt-1">Updating...</p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-            <HardDrive className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              {statsLoading && (
+                <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
+              )}
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsage.memory.toFixed(0)} MB</div>
             <p className="text-xs text-muted-foreground">
               of {totalLimits.memory} MB ({utilizationData[1].percentage.toFixed(1)}%)
             </p>
+            {statsLoading && (
+              <p className="text-xs text-blue-600 mt-1">Updating...</p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              {statsLoading && (
+                <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
+              )}
+              <Database className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsage.storage.toFixed(1)} GB</div>
             <p className="text-xs text-muted-foreground">
               of {totalLimits.storage} GB ({utilizationData[2].percentage.toFixed(1)}%)
             </p>
+            {statsLoading && (
+              <p className="text-xs text-blue-600 mt-1">Updating...</p>
+            )}
           </CardContent>
         </Card>
       </div>

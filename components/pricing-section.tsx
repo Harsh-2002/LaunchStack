@@ -37,18 +37,21 @@ export function PricingSection() {
 
   const features = {
     starter: [
-      "1/2 CPU Core",
+      "0.5 CPU Core",
       "512 MB RAM",
-      "2GB storage",
+      "1GB storage",
+      "1 instance",
       "SQLite database",
       "Unlimited operations",
       "Community support",
+      "7-day free trial",
       "Weekly backups"
     ],
     pro: [
-      "1 CPU Core (auto-scalable)",
+      "1.0 CPU Core (auto-scalable)",
       "1GB RAM (auto-scalable)",
-      "10GB storage",
+      "20GB storage",
+      "10 instances",
       "PostgreSQL database",
       "Unlimited operations",
       "Priority email support",
@@ -171,11 +174,19 @@ export function PricingSection() {
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center text-xs sm:text-sm">
                   <Cpu className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
-                  <span>1/2 CPU Core</span>
+                  <span>0.5 CPU Core</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm">
                   <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
                   <span>512 MB RAM</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm">
+                  <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
+                  <span>1GB storage</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm">
+                  <Server className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
+                  <span>1 instance</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm">
                   <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
@@ -254,11 +265,19 @@ export function PricingSection() {
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center text-xs sm:text-sm">
                   <Cpu className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
-                  <span>1 CPU Core (auto-scalable)</span>
+                  <span>1.0 CPU Core (auto-scalable)</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm">
                   <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
                   <span>1 GB RAM (auto-scalable)</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm">
+                  <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
+                  <span>20GB storage</span>
+                </div>
+                <div className="flex items-center text-xs sm:text-sm">
+                  <Server className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />
+                  <span>10 instances</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm">
                   <Database className="h-3 sm:h-3.5 w-3 sm:w-3.5 mr-2 text-gray-500" />

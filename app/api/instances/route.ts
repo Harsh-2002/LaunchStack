@@ -13,6 +13,10 @@ export async function GET(request: NextRequest) {
         url: 'https://prod.n8n.example.com',
         region: 'us-east-1',
         plan: 'Pro',
+        cpu_limit: 1.0,
+        memory_limit: 1024,
+        storage_limit: 20,
+        description: 'Main production environment for critical workflows',
         resources: {
           cpu: 2,
           memory: 4096,
@@ -28,6 +32,10 @@ export async function GET(request: NextRequest) {
         url: 'dev.n8n.example.com',
         region: 'us-west-2',
         plan: 'Starter',
+        cpu_limit: 0.5,
+        memory_limit: 512,
+        storage_limit: 1,
+        description: 'Development and testing environment',
         resources: {
           cpu: 1,
           memory: 2048,
@@ -43,10 +51,33 @@ export async function GET(request: NextRequest) {
         url: 'test.n8n.example.com',
         region: 'eu-west-1',
         plan: 'Starter',
+        cpu_limit: 0.5,
+        memory_limit: 512,
+        storage_limit: 1,
+        description: 'Isolated testing environment',
         resources: {
           cpu: 1,
           memory: 1024,
           disk: 20
+        }
+      },
+      {
+        id: 'inst_004',
+        name: 'Legacy Workflows',
+        status: 'expired' as const,
+        created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        url: 'legacy.n8n.example.com',
+        region: 'us-east-1',
+        plan: 'Starter',
+        cpu_limit: 0.5,
+        memory_limit: 512,
+        storage_limit: 1,
+        description: 'Suspended due to payment failure - requires payment update',
+        resources: {
+          cpu: 1,
+          memory: 512,
+          disk: 15
         }
       }
     ];

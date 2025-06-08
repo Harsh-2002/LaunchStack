@@ -15,7 +15,8 @@ import {
   HardDrive,
   Database,
   Calendar,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 import type { Instance } from '@/lib/api-client';
 import { EditInstanceDialog } from '@/components/edit-instance-dialog';
@@ -42,16 +43,18 @@ interface InstanceCardProps {
   };
   onAction: (instanceId: string, action: 'start' | 'stop' | 'restart' | 'delete') => void;
   actionLoading: Record<string, boolean>;
+  statsLoading?: boolean;
   onEdit: () => void;
 }
 
-export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit }: InstanceCardProps) {
+export function InstanceCard({ instance, usage, onAction, actionLoading, statsLoading, onEdit }: InstanceCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'running': return 'bg-green-100 text-green-800 border-green-200';
       case 'stopped': return 'bg-red-100 text-red-800 border-red-200';
       case 'starting': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'stopping': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'expired': return 'bg-purple-100 text-purple-800 border-purple-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -60,6 +63,7 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
     switch (status) {
       case 'running': return <Play className="h-3 w-3" />;
       case 'stopped': return <Square className="h-3 w-3" />;
+      case 'expired': return <AlertTriangle className="h-3 w-3" />;
       default: return <RotateCcw className="h-3 w-3 animate-spin" />;
     }
   };
@@ -115,12 +119,13 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => onAction(instance.id, 'delete')}
-                    className="bg-red-600 hover:bg-red-700"
+                    disabled={actionLoading[`${instance.id}-delete`]}
+                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
                   >
                     {actionLoading[`${instance.id}-delete`] && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    Delete
+                    {actionLoading[`${instance.id}-delete`] ? 'Deleting...' : 'Delete'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -149,9 +154,14 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
         </div>
 
         {/* Resource Usage */}
-        {usage && (
+        {usage ? (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium">Resource Usage</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium">Resource Usage</h4>
+              {statsLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
@@ -168,7 +178,7 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
                   <HardDrive className="h-4 w-4" />
                   <span>Memory</span>
                 </div>
-                <span>{usage.memory} / {instance.memory_limit} MB</span>
+                <span>{usage.memory.toFixed(1)} / {instance.memory_limit} MB</span>
               </div>
               <Progress value={memoryPercentage} className="h-2" />
             </div>
@@ -183,6 +193,43 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
               <Progress value={storagePercentage} className="h-2" />
             </div>
           </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium">Resource Usage</h4>
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+            <div className="space-y-2 opacity-50">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4" />
+                  <span>CPU</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <Progress value={0} className="h-2" />
+            </div>
+            <div className="space-y-2 opacity-50">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="h-4 w-4" />
+                  <span>Memory</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <Progress value={0} className="h-2" />
+            </div>
+            <div className="space-y-2 opacity-50">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  <span>Storage</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <Progress value={0} className="h-2" />
+            </div>
+          </div>
         )}
 
         {/* Instance Info */}
@@ -195,6 +242,17 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
 
         {/* Action Buttons */}
         <div className="flex gap-2">
+          {instance.status === 'expired' && (
+            <div className="flex-1 bg-purple-50 border border-purple-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-purple-800 text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="font-medium">Payment Required</span>
+              </div>
+              <p className="text-xs text-purple-600 mt-1">
+                Instance suspended due to payment failure. Please update your payment method.
+              </p>
+            </div>
+          )}
           {instance.status === 'stopped' && (
             <Button
               onClick={() => onAction(instance.id, 'start')}
