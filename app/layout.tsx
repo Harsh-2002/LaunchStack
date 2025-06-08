@@ -109,6 +109,10 @@ export default function RootLayout({
           privacyPageUrl: "/privacy"
         }
       }}
+      signInUrl="/login"
+      signUpUrl="/signup"
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
     >
       <html lang="en" suppressHydrationWarning className={`${montserrat.variable} ${workSans.variable}`}>
         <head>

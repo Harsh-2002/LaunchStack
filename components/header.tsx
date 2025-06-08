@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton
@@ -116,7 +114,7 @@ export default function Header() {
             <HealthStatusComponent variant="minimal" showRefresh={false} />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal">
+            <Link href="/login">
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -124,15 +122,15 @@ export default function Header() {
               >
                 Sign In
               </Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
+            </Link>
+            <Link href="/signup">
               <Button 
                 size="sm"
                 className="bg-black hover:bg-gray-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 border-0 px-4 py-2"
               >
                 Sign Up
               </Button>
-            </SignUpButton>
+            </Link>
           </SignedOut>
           <SignedIn>
             <UserButton 
@@ -210,16 +208,16 @@ export default function Header() {
                   {/* Mobile Authentication */}
                   <div className="border-t border-gray-200 mt-3 pt-3 space-y-3">
                     <SignedOut>
-                      <SignInButton mode="modal">
+                      <Link href="/login" onClick={closeMenu}>
                         <button className="block w-full text-center px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 border-2 border-gray-200 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 rounded-lg mx-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
                           Sign In
                         </button>
-                      </SignInButton>
-                      <SignUpButton mode="modal">
+                      </Link>
+                      <Link href="/signup" onClick={closeMenu}>
                         <button className="block w-full text-center px-4 py-3 text-sm font-semibold text-white bg-black hover:bg-gray-800 transition-all duration-300 rounded-lg mx-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                           Sign Up
                         </button>
-                      </SignUpButton>
+                      </Link>
                     </SignedOut>
                     <SignedIn>
                       <div className="px-4 py-2.5 text-center">
