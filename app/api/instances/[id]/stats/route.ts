@@ -15,11 +15,11 @@ export async function GET(
     };
 
     // Generate realistic mock data based on instance ID
-    const seed = instanceId.charCodeAt(instanceId.length - 1) || 1;
-    const cpuUsage = Math.round((40 + seed * 3) * 100) / 100; // 40-70%
-    const memoryUsage = Math.round((1024 + seed * 200) * 100) / 100; // 1224-2024 MB
+    const seed = (instanceId.charCodeAt(instanceId.length - 1) || 1) % 10; // Limit seed to 0-9
+    const cpuUsage = Math.round((20 + seed * 5) * 100) / 100; // 20-65%
+    const memoryUsage = Math.round((512 + seed * 100) * 100) / 100; // 512-1412 MB
     const memoryLimit = 4096; // 4GB limit
-    const diskUsage = Math.round((15 + seed * 5) * 100) / 100; // 15-40 GB
+    const diskUsage = Math.round((5 + seed * 2) * 100) / 100; // 5-23 GB
 
     const instanceStats = {
       ...baseStats,
@@ -31,9 +31,9 @@ export async function GET(
       memory_formatted: `${memoryUsage.toFixed(0)} MB / ${memoryLimit} MB`,
       disk_usage: diskUsage,
       disk_formatted: `${diskUsage} GB`,
-      network_in: Math.round((100 + seed * 50) * 100) / 100, // MB
-      network_out: Math.round((80 + seed * 40) * 100) / 100, // MB
-      network_formatted: `↓${(100 + seed * 50).toFixed(1)} MB ↑${(80 + seed * 40).toFixed(1)} MB`
+      network_in: Math.round((10 + seed * 5) * 100) / 100, // 10-55 MB
+      network_out: Math.round((8 + seed * 3) * 100) / 100, // 8-35 MB
+      network_formatted: `↓${(10 + seed * 5).toFixed(1)} MB ↑${(8 + seed * 3).toFixed(1)} MB`
     };
 
     return NextResponse.json(instanceStats);

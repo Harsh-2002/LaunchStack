@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.launchstack.io/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://gw.srvr.site/api/v1';
 
 // Type definitions (shared with client-side API)
 export interface User {
