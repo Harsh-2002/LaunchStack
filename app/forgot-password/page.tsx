@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         {/* Back to Login Link */}
         <div className="mb-6">
           <Link 

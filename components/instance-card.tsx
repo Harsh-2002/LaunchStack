@@ -167,62 +167,33 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
         </div>
 
         {/* Resource Usage */}
-        {usage ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Resource Usage</h4>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-4 w-4" />
-                  <span>CPU</span>
-                </div>
-                <span className={usage ? getCPUColor(usage.cpu) : ''}>
-                  {usage ? formatCPU(usage.cpu) : '0.00'}%
-                </span>
-              </div>
-              <Progress value={cpuPercentage} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <HardDrive className="h-4 w-4" />
-                  <span>Memory</span>
-                </div>
-                <span>{usage.memory.toFixed(1)} / {instance.memory_limit} MB</span>
-              </div>
-              <Progress value={memoryPercentage} className="h-2" />
-            </div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium">Resource Usage</h4>
           </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Resource Usage</h4>
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            </div>
-            <div className="space-y-2 opacity-50">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-4 w-4" />
-                  <span>CPU</span>
-                </div>
-                <span>Loading...</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <Cpu className="h-4 w-4" />
+                <span>CPU</span>
               </div>
-              <Progress value={0} className="h-2" />
+              <span className={usage ? getCPUColor(usage.cpu) : 'text-gray-500'}>
+                {usage ? formatCPU(usage.cpu) : '0.00'}%
+              </span>
             </div>
-            <div className="space-y-2 opacity-50">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <HardDrive className="h-4 w-4" />
-                  <span>Memory</span>
-                </div>
-                <span>Loading...</span>
-              </div>
-              <Progress value={0} className="h-2" />
-            </div>
+            <Progress value={cpuPercentage} className="h-2" />
           </div>
-        )}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4" />
+                <span>Memory</span>
+              </div>
+              <span>{usage ? usage.memory.toFixed(1) : '0.0'} / {instance.memory_limit} MB</span>
+            </div>
+            <Progress value={memoryPercentage} className="h-2" />
+          </div>
+        </div>
 
         {/* Instance Info */}
         <div className="flex items-center gap-4 text-sm text-gray-600">

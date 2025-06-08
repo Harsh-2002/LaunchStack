@@ -137,7 +137,7 @@ export function AuthForm({ type }: AuthFormProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         {/* Back to Home Link */}
         <div className="mb-6">
           <Link href="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200">

@@ -27,7 +27,7 @@ export interface Instance {
   id: string;
   name: string;
   description: string;
-  status: 'running' | 'stopped' | 'starting' | 'stopping';
+  status: 'running' | 'stopped' | 'starting' | 'stopping' | 'expired';
   url: string;
   cpu_limit: number;
   memory_limit: number;
