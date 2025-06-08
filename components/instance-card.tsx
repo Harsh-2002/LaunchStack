@@ -43,11 +43,10 @@ interface InstanceCardProps {
   };
   onAction: (instanceId: string, action: 'start' | 'stop' | 'restart' | 'delete') => void;
   actionLoading: Record<string, boolean>;
-  statsLoading?: boolean;
   onEdit: () => void;
 }
 
-export function InstanceCard({ instance, usage, onAction, actionLoading, statsLoading, onEdit }: InstanceCardProps) {
+export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit }: InstanceCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'running': return 'bg-green-100 text-green-800 border-green-200';
@@ -78,9 +77,11 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, statsLo
     });
   };
 
-  const cpuPercentage = usage ? (usage.cpu / instance.cpu_limit) * 100 : 0;
+  // CPU usage is now already a percentage from the API
+  const cpuPercentage = usage ? usage.cpu : 0;
   const memoryPercentage = usage ? (usage.memory / instance.memory_limit) * 100 : 0;
-  const storagePercentage = usage ? (usage.storage / instance.storage_limit) * 100 : 0;
+  // Storage usage removed - no longer tracked
+  const storagePercentage = 0;
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -158,9 +159,6 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, statsLo
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Resource Usage</h4>
-              {statsLoading && (
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -168,7 +166,7 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, statsLo
                   <Cpu className="h-4 w-4" />
                   <span>CPU</span>
                 </div>
-                <span>{usage.cpu.toFixed(1)} / {instance.cpu_limit} cores</span>
+                <span>{usage.cpu.toFixed(1)}%</span>
               </div>
               <Progress value={cpuPercentage} className="h-2" />
             </div>
@@ -181,16 +179,6 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, statsLo
                 <span>{usage.memory.toFixed(1)} / {instance.memory_limit} MB</span>
               </div>
               <Progress value={memoryPercentage} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Database className="h-4 w-4" />
-                  <span>Storage</span>
-                </div>
-                <span>{usage.storage.toFixed(1)} / {instance.storage_limit} GB</span>
-              </div>
-              <Progress value={storagePercentage} className="h-2" />
             </div>
           </div>
         ) : (
@@ -214,16 +202,6 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, statsLo
                 <div className="flex items-center gap-2">
                   <HardDrive className="h-4 w-4" />
                   <span>Memory</span>
-                </div>
-                <span>Loading...</span>
-              </div>
-              <Progress value={0} className="h-2" />
-            </div>
-            <div className="space-y-2 opacity-50">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Database className="h-4 w-4" />
-                  <span>Storage</span>
                 </div>
                 <span>Loading...</span>
               </div>

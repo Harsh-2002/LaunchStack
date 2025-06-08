@@ -364,19 +364,11 @@ export function DashboardContent() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Resource Usage</CardTitle>
-              <div className="flex items-center gap-2">
-                {statsLoading && (
-                  <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
-                )}
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </div>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{Math.round(usagePercentage)}%</div>
               <Progress value={usagePercentage} className="mt-2" />
-              {statsLoading && (
-                <p className="text-xs text-blue-600 mt-1">Updating...</p>
-              )}
             </CardContent>
           </Card>
 
@@ -410,20 +402,13 @@ export function DashboardContent() {
                       variant="outline"
                       size="sm"
                       onClick={() => loadResourceStats(true)}
-                      disabled={statsLoading}
                     >
-                      {statsLoading ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
+                      <RefreshCw className="h-4 w-4" />
                       <span className="ml-1">Refresh Stats</span>
                     </Button>
-                    {!statsLoading && (
-                      <span className="text-xs text-muted-foreground">
-                        Next auto-refresh in {nextRefresh}s
-                      </span>
-                    )}
+                    <span className="text-xs text-muted-foreground">
+                      Next auto-refresh in {nextRefresh}s
+                    </span>
                   </div>
                 )}
               </div>
@@ -460,12 +445,11 @@ export function DashboardContent() {
                     usage={instanceStats[instance.id] ? {
                       cpu: instanceStats[instance.id].cpu_usage,
                       memory: instanceStats[instance.id].memory_usage / (1024 * 1024), // Convert bytes to MB
-                      storage: instanceStats[instance.id].disk_usage / (1024 * 1024 * 1024), // Convert bytes to GB
+                      storage: 0, // Storage tracking removed
                       status: instance.status
                     } : undefined}
                     onAction={handleInstanceAction}
                     actionLoading={actionLoading}
-                    statsLoading={statsLoading}
                     onEdit={loadDashboardData}
                   />
                 ))}
@@ -480,7 +464,6 @@ export function DashboardContent() {
               <UsageChart 
                 instances={instances} 
                 instanceStats={instanceStats} 
-                statsLoading={statsLoading}
               />
             ) : (
               <Card>
@@ -553,10 +536,6 @@ export function DashboardContent() {
                   <div className="flex items-center gap-2">
                     <HardDrive className="h-4 w-4" />
                     <span className="text-sm">Memory: {user?.resource_limits?.memory_limit || 'N/A'} MB</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4" />
-                    <span className="text-sm">Storage: {user?.resource_limits?.storage_limit || 'N/A'} GB</span>
                   </div>
                 </div>
               </CardContent>

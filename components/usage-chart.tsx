@@ -16,15 +16,14 @@ import {
   Cell
 } from 'recharts';
 import { Instance, InstanceStats } from '@/lib/api-client';
-import { Cpu, HardDrive, Database, TrendingUp, RefreshCw } from 'lucide-react';
+import { Cpu, HardDrive, Database, TrendingUp } from 'lucide-react';
 
 interface UsageChartProps {
   instances: Instance[];
   instanceStats: Record<string, InstanceStats>;
-  statsLoading?: boolean;
 }
 
-export function UsageChart({ instances, instanceStats, statsLoading }: UsageChartProps) {
+export function UsageChart({ instances, instanceStats }: UsageChartProps) {
   // Generate sample time-series data for demonstration
   const generateTimeSeriesData = () => {
     const hours = Array.from({ length: 24 }, (_, i) => {
@@ -35,7 +34,7 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
         time: hour.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         cpu: Math.random() * 80 + 10,
         memory: Math.random() * 70 + 20,
-        storage: Math.random() * 60 + 30,
+        // Storage tracking removed
       };
     });
     return hours;
@@ -50,50 +49,45 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
       name: instance.name,
       cpu: stats ? stats.cpu_usage : 0,
       memory: stats ? (stats.memory_usage / (1024 * 1024)) : 0, // Convert bytes to MB
-      storage: stats ? (stats.disk_usage / (1024 * 1024 * 1024)) : 0, // Convert bytes to GB
+      // Storage tracking removed
     };
   });
 
-  // Calculate total resource usage
-  const totalUsage = instances.reduce((acc, instance) => {
-    const stats = instanceStats[instance.id];
-    if (stats) {
-      acc.cpu += stats.cpu_usage;
-      acc.memory += stats.memory_usage / (1024 * 1024); // Convert to MB
-      acc.storage += stats.disk_usage / (1024 * 1024 * 1024); // Convert to GB
-    }
-    return acc;
-  }, { cpu: 0, memory: 0, storage: 0 });
+  // Calculate average resource usage across instances
+  const averageUsage = instances.length > 0 ? {
+    cpu: instances.reduce((acc, instance) => {
+      const stats = instanceStats[instance.id];
+      return acc + (stats ? stats.cpu_usage : 0);
+    }, 0) / instances.length,
+    memory: instances.reduce((acc, instance) => {
+      const stats = instanceStats[instance.id];
+      return acc + (stats ? stats.memory_usage / (1024 * 1024) : 0); // Convert bytes to MB
+    }, 0) / instances.length,
+  } : { cpu: 0, memory: 0 };
 
   const totalLimits = instances.reduce((acc, instance) => {
     acc.cpu += instance.cpu_limit;
     acc.memory += instance.memory_limit;
-    acc.storage += instance.storage_limit;
+    // Storage limits removed
     return acc;
-  }, { cpu: 0, memory: 0, storage: 0 });
+  }, { cpu: 0, memory: 0 });
 
   const utilizationData = [
     {
       name: 'CPU',
-      used: totalUsage.cpu,
-      available: totalLimits.cpu - totalUsage.cpu,
-      percentage: totalLimits.cpu > 0 ? (totalUsage.cpu / totalLimits.cpu) * 100 : 0,
+      used: averageUsage.cpu,
+      available: 100 - averageUsage.cpu, // CPU is percentage, so available is 100 - used
+      percentage: averageUsage.cpu,
       color: '#3b82f6',
     },
     {
       name: 'Memory',
-      used: totalUsage.memory,
-      available: totalLimits.memory - totalUsage.memory,
-      percentage: totalLimits.memory > 0 ? (totalUsage.memory / totalLimits.memory) * 100 : 0,
+      used: averageUsage.memory,
+      available: totalLimits.memory - averageUsage.memory,
+      percentage: totalLimits.memory > 0 ? (averageUsage.memory / totalLimits.memory) * 100 : 0,
       color: '#10b981',
     },
-    {
-      name: 'Storage',
-      used: totalUsage.storage,
-      available: totalLimits.storage - totalUsage.storage,
-      percentage: totalLimits.storage > 0 ? (totalUsage.storage / totalLimits.storage) * 100 : 0,
-      color: '#f59e0b',
-    },
+    // Storage tracking removed
   ];
 
   const chartConfig = {
@@ -105,76 +99,36 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
       label: 'Memory',
       color: '#10b981',
     },
-    storage: {
-      label: 'Storage',
-      color: '#f59e0b',
-    },
+    // Storage config removed
   };
 
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">CPU Usage</CardTitle>
-            <div className="flex items-center gap-2">
-              {statsLoading && (
-                <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
-              )}
-              <Cpu className="h-4 w-4 text-muted-foreground" />
-            </div>
+            <Cpu className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsage.cpu.toFixed(1)}</div>
+            <div className="text-2xl font-bold">{averageUsage.cpu.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">
-              of {totalLimits.cpu} cores ({utilizationData[0].percentage.toFixed(1)}%)
+              Average CPU utilization across {instances.length} instance{instances.length !== 1 ? 's' : ''}
             </p>
-            {statsLoading && (
-              <p className="text-xs text-blue-600 mt-1">Updating...</p>
-            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-            <div className="flex items-center gap-2">
-              {statsLoading && (
-                <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
-              )}
-              <HardDrive className="h-4 w-4 text-muted-foreground" />
-            </div>
+            <HardDrive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsage.memory.toFixed(0)} MB</div>
+            <div className="text-2xl font-bold">{averageUsage.memory.toFixed(0)} MB</div>
             <p className="text-xs text-muted-foreground">
               of {totalLimits.memory} MB ({utilizationData[1].percentage.toFixed(1)}%)
             </p>
-            {statsLoading && (
-              <p className="text-xs text-blue-600 mt-1">Updating...</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
-            <div className="flex items-center gap-2">
-              {statsLoading && (
-                <RefreshCw className="h-3 w-3 animate-spin text-blue-600" />
-              )}
-              <Database className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalUsage.storage.toFixed(1)} GB</div>
-            <p className="text-xs text-muted-foreground">
-              of {totalLimits.storage} GB ({utilizationData[2].percentage.toFixed(1)}%)
-            </p>
-            {statsLoading && (
-              <p className="text-xs text-blue-600 mt-1">Updating...</p>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -184,7 +138,7 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
         <CardHeader>
           <CardTitle>Resource Usage Over Time</CardTitle>
           <CardDescription>
-            CPU, Memory, and Storage utilization over the last 24 hours
+            CPU and Memory utilization over the last 24 hours
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -212,14 +166,6 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
                 stackId="1"
                 stroke={chartConfig.memory.color}
                 fill={chartConfig.memory.color}
-                fillOpacity={0.6}
-              />
-              <Area
-                type="monotone"
-                dataKey="storage"
-                stackId="1"
-                stroke={chartConfig.storage.color}
-                fill={chartConfig.storage.color}
                 fillOpacity={0.6}
               />
             </AreaChart>
@@ -259,11 +205,6 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
                   fill={chartConfig.memory.color}
                   radius={[4, 4, 0, 0]}
                 />
-                <Bar
-                  dataKey="storage"
-                  fill={chartConfig.storage.color}
-                  radius={[4, 4, 0, 0]}
-                />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -275,7 +216,7 @@ export function UsageChart({ instances, instanceStats, statsLoading }: UsageChar
         <CardHeader>
           <CardTitle>Overall Resource Utilization</CardTitle>
           <CardDescription>
-            Distribution of resource usage across CPU, Memory, and Storage
+            Distribution of resource usage across CPU and Memory
           </CardDescription>
         </CardHeader>
         <CardContent>

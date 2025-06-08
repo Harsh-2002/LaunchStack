@@ -10,7 +10,7 @@
 ### 2. **Loading Indicators & Visual Feedback**
 - **Instance Cards**: Show loading spinners when resource stats are updating
 - **Overview Cards**: Display updating indicators with spinner animations
-- **Usage Charts**: Live update indicators in CPU, Memory, and Storage cards
+- **Usage Charts**: Live update indicators in CPU and Memory cards
 - **Progress Circles**: Loading states for all async operations
 
 ### 3. **Enhanced Delete Operation UX**
