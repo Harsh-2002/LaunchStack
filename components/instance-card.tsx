@@ -83,6 +83,18 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
   // Storage usage removed - no longer tracked
   const storagePercentage = 0;
 
+  // Format CPU usage with appropriate decimal places and color coding
+  const formatCPU = (cpuUsage: number) => {
+    const formatted = cpuUsage < 10 ? cpuUsage.toFixed(2) : cpuUsage.toFixed(1);
+    return formatted;
+  };
+
+  const getCPUColor = (cpuUsage: number) => {
+    if (cpuUsage > 80) return 'text-red-500';
+    if (cpuUsage > 40) return 'text-yellow-500';
+    return 'text-green-500';
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -166,7 +178,9 @@ export function InstanceCard({ instance, usage, onAction, actionLoading, onEdit 
                   <Cpu className="h-4 w-4" />
                   <span>CPU</span>
                 </div>
-                <span>{usage.cpu.toFixed(1)}%</span>
+                <span className={usage ? getCPUColor(usage.cpu) : ''}>
+                  {usage ? formatCPU(usage.cpu) : '0.00'}%
+                </span>
               </div>
               <Progress value={cpuPercentage} className="h-2" />
             </div>

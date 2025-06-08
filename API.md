@@ -1,7 +1,16 @@
 # LaunchStack Backend API Documentation
 
 ## Overview
-LaunchStack is a PaaS solution providing self-hosted n8n workflow automation instances with Docker-based architecture. The platform supports multiple subscription tiers: Free, Basic, Pro, and Enterprise, each with different resource allocations.
+LaunchStack is a PaaS solution providing self-hosted n8n workflow automation instances with Docker-based architecture. The platform supports two subscription tiers: Starter (with 7-day free trial) and Pro, each with different resource allocations.
+
+### Subscription Tiers and Resource Limits
+
+| Plan    | Price             | Instances | CPU per Instance | Memory per Instance | Storage per Instance |
+|---------|-------------------|-----------|------------------|---------------------|---------------------|
+| Starter | $2/mo or $20/yr   | 1         | 0.5 CPU          | 512 MB              | 1 GB                |
+| Pro     | $5/mo or $50/yr   | 10        | 1.0 CPU          | 1 GB                | 20 GB               |
+
+The Starter plan includes a 7-day free trial period. After the trial ends, users are billed according to their selected billing cycle (monthly or yearly). If payment fails, instances will be marked as expired and scheduled for deletion.
 
 ## Base URL
 All API endpoints use the following base URL:
@@ -82,8 +91,8 @@ GET /api/v1/users/me
   },
   "resource_limits": {
     "max_instances": 10,
-    "cpu_limit": 2.0,
-    "memory_limit": 2048,
+    "cpu_limit": 1.0,
+    "memory_limit": 1024,
     "storage_limit": 20
   }
 }
@@ -132,8 +141,8 @@ GET /api/v1/instances
     "description": "Production automation workflows",
     "status": "running",
     "url": "prod-workflows-abc123.launchstack.io",
-    "cpu_limit": 2.0,
-    "memory_limit": 2048,
+    "cpu_limit": 1.0,
+    "memory_limit": 1024,
     "storage_limit": 20,
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T12:00:00Z"
@@ -174,8 +183,8 @@ POST /api/v1/instances
   "description": "Automation workflows for marketing team",
   "status": "running",
   "url": "marketing-workflows-ghi789.launchstack.io",
-  "cpu_limit": 2.0,
-  "memory_limit": 2048,
+  "cpu_limit": 1.0,
+  "memory_limit": 1024,
   "storage_limit": 20,
   "created_at": "2024-04-20T00:00:00Z",
   "updated_at": "2024-04-20T00:00:00Z"
@@ -195,8 +204,8 @@ GET /api/v1/instances/:id
   "description": "Production automation workflows",
   "status": "running",
   "url": "prod-workflows-abc123.launchstack.io",
-  "cpu_limit": 2.0,
-  "memory_limit": 2048,
+  "cpu_limit": 1.0,
+  "memory_limit": 1024,
   "storage_limit": 20,
   "created_at": "2024-01-01T00:00:00Z",
   "updated_at": "2024-01-01T12:00:00Z"
@@ -264,19 +273,72 @@ GET /api/v1/instances/:id/stats
   "id": "123e4567-e89b-12d3-a456-426614174000",
   "instance_id": "123e4567-e89b-12d3-a456-426614174000",
   "timestamp": "2025-06-07T19:26:11+05:30",
-  "cpu_usage": 1.25,
-  "cpu_formatted": "1.3%",
+  "cpu_usage": 15.75,
+  "cpu_formatted": "15.8%",
   "memory_usage": 268435456,
   "memory_limit": 2147483648,
   "memory_percentage": 12.5,
   "memory_formatted": "256.0 MB / 2.0 GB (12.5%)",
-  "disk_usage": 52428800,
-  "disk_formatted": "50.0 MB",
+  "disk_usage": 0,
+  "disk_formatted": "0 B",
   "network_in": 1048576,
   "network_out": 524288,
   "network_formatted": "1.0 MB in / 512.0 KB out"
 }
 ```
+
+Notes:
+- CPU usage is reported as a percentage value (0-100%) of total available CPU capacity
+- Very small but non-zero CPU usage will be reported as a minimum of 0.01%
+- Memory usage is reported in bytes with a formatted human-readable representation
+- Disk usage is no longer tracked and will always be 0
+- Network I/O is reported in bytes with a formatted human-readable representation
+- Resource usage metrics are collected every 10 seconds
+
+#### Get Instance Historical Resource Stats
+```
+GET /api/v1/instances/:id/stats/history
+```
+
+Query Parameters:
+- `period` - Time period to retrieve stats for. Possible values: `10m` (default), `1h`, `6h`, `24h`
+
+**Response (200 OK)**:
+```json
+{
+  "instance_id": "123e4567-e89b-12d3-a456-426614174000",
+  "period": "10m",
+  "data_points": [
+    {
+      "timestamp": "2025-06-07T19:26:11+05:30",
+      "cpu_usage": 15.75,
+      "memory_usage": 268435456,
+      "memory_limit": 2147483648,
+      "memory_percentage": 12.5,
+      "network_in": 1048576,
+      "network_out": 524288
+    },
+    {
+      "timestamp": "2025-06-07T19:26:01+05:30",
+      "cpu_usage": 14.32,
+      "memory_usage": 264241152,
+      "memory_limit": 2147483648,
+      "memory_percentage": 12.3,
+      "network_in": 1032192,
+      "network_out": 512000
+    }
+    // Additional data points...
+  ]
+}
+```
+
+Notes:
+- Data points are ordered from newest to oldest
+- Up to 100 data points may be returned
+- Only data points within the specified time period are included
+- CPU usage is reported as a percentage value (0-100%)
+- Memory usage is reported in bytes
+- Data is suitable for building time-series graphs in the UI
 
 ### Payment Management (When Enabled)
 
@@ -290,21 +352,14 @@ GET /api/v1/payments
 [
   {
     "id": "123e4567-e89b-12d3-a456-426614174000",
-    "amount": 29.00,
-    "currency": "usd",
-    "status": "succeeded",
-    "description": "Subscription payment",
-    "invoice_url": "https://invoice.paypal.com/i/xxx",
-    "created_at": "2024-01-01T00:00:00Z"
-  },
-  {
-    "id": "223e4567-e89b-12d3-a456-426614174000",
-    "amount": 29.00,
-    "currency": "usd",
-    "status": "succeeded",
-    "description": "Subscription payment",
-    "invoice_url": "https://invoice.paypal.com/i/yyy",
-    "created_at": "2024-02-01T00:00:00Z"
+    "user_id": "user_123",
+    "amount": 5.00,
+    "currency": "USD",
+    "status": "completed",
+    "payment_method": "paypal",
+    "description": "Pro Plan - Monthly",
+    "paypal_order_id": "PAYPAL-ORDER-123",
+    "created_at": "2025-06-01T12:00:00Z"
   }
 ]
 ```
@@ -317,17 +372,16 @@ POST /api/v1/payments/checkout
 **Request Body**:
 ```json
 {
-  "plan": "pro",
-  "success_url": "https://launchstack.io/dashboard?success=true",
-  "cancel_url": "https://launchstack.io/pricing?canceled=true"
+  "plan_id": "pro_monthly",
+  "return_url": "https://example.com/success",
+  "cancel_url": "https://example.com/cancel"
 }
 ```
 
 **Response (200 OK)**:
 ```json
 {
-  "checkout_url": "https://www.paypal.com/checkoutnow?token=xxx",
-  "order_id": "order_12345"
+  "checkout_url": "https://www.paypal.com/checkoutnow?token=EC-123456789"
 }
 ```
 
@@ -339,11 +393,12 @@ GET /api/v1/payments/subscriptions
 **Response (200 OK)**:
 ```json
 {
-  "id": "sub_xxxxx",
-  "plan": "pro",
-  "status": "active",
-  "current_period_end": "2024-05-01T00:00:00Z",
-  "cancel_at_period_end": false
+  "subscription_id": "I-12345678",
+  "plan_id": "pro_monthly",
+  "status": "ACTIVE",
+  "start_date": "2025-06-01T12:00:00Z",
+  "next_billing_date": "2025-07-01T12:00:00Z",
+  "instances_limit": 10
 }
 ```
 
@@ -355,8 +410,7 @@ POST /api/v1/payments/subscriptions/:id/cancel
 **Response (200 OK)**:
 ```json
 {
-  "status": "success",
-  "message": "Subscription will be canceled at the end of the current billing period"
+  "message": "Subscription canceled successfully"
 }
 ```
 
@@ -399,15 +453,12 @@ The API implements a permissive CORS policy that:
 
 All API endpoints return appropriate HTTP status codes:
 
-- `200 OK`: Request successful
-- `201 Created`: Resource created successfully
-- `400 Bad Request`: Invalid request parameters
-- `401 Unauthorized`: Missing or invalid authentication
-- `403 Forbidden`: Valid authentication but insufficient permissions
-- `404 Not Found`: Resource not found
-- `409 Conflict`: Resource conflict (e.g., name already exists)
-- `429 Too Many Requests`: Rate limit exceeded
-- `500 Internal Server Error`: Server error
+- `200 OK` - Request successful
+- `400 Bad Request` - Invalid request parameters
+- `401 Unauthorized` - Authentication required
+- `403 Forbidden` - Action not allowed
+- `404 Not Found` - Resource not found
+- `500 Internal Server Error` - Server error
 
 Error response body format:
 
@@ -426,4 +477,4 @@ When running in development mode with `DISABLE_PAYMENTS=true`, authentication an
 3. Skip PayPal integration for payments and subscriptions
 4. Allow full access to all endpoints
 
-This mode is intended for development and testing only. 
+This mode is intended for development and testing only.

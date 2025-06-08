@@ -116,6 +116,22 @@ export interface HealthStatus {
   };
 }
 
+export interface HistoryDataPoint {
+  timestamp: string;
+  cpu_usage: number;
+  memory_usage: number;
+  memory_limit: number;
+  memory_percentage: number;
+  network_in: number;
+  network_out: number;
+}
+
+export interface InstanceStatsHistory {
+  instance_id: string;
+  period: string;
+  data_points: HistoryDataPoint[];
+}
+
 // Hook for client-side API requests
 export function useApiClient() {
   const { getToken } = useAuth();
@@ -222,6 +238,8 @@ export function useApiClient() {
       restart: (id: string): Promise<{ message: string }> =>
         apiRequest(`/instances/${id}/restart/`, { method: 'POST' }),
       getStats: (id: string): Promise<InstanceStats> => apiRequest(`/instances/${id}/stats/`),
+      getStatsHistory: (id: string, period: string = '10m'): Promise<InstanceStatsHistory> => 
+        apiRequest(`/instances/${id}/stats/history?period=${period}`),
     },
 
     // Usage API
